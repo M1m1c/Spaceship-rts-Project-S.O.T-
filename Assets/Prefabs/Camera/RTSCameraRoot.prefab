@@ -136,7 +136,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 3735458143336373734}
         m_TargetAssemblyTypeName: RTSCameraBase, Assembly-CSharp
-        m_MethodName: InputMoveDirection
+        m_MethodName: InputHorizontalMoveDirection
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -196,6 +196,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: c197e46d-ab80-4f93-86bc-69cf60372b85
     m_ActionName: GameCamera/RotationToggle[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3735458143336373734}
+        m_TargetAssemblyTypeName: RTSCameraBase, Assembly-CSharp
+        m_MethodName: InputVerticalMoveDirection
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e30dd1fc-f6c7-43a8-a44d-415249ddff7a
+    m_ActionName: GameCamera/MoveVertical[/Keyboard/z,/Keyboard/x]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: GameCamera

@@ -12,7 +12,8 @@ public class RTSCameraBase : MonoBehaviour
 
     //TODO make settings json or scriptable object used to set some fo these settings
 
-    private Vector2 moveDirection = new Vector2();
+    private Vector2 horizontalMoveDirection = new Vector2();
+    private float verticalMoveDirection;
     private float moveSpeed = 0.3f;
 
     private Vector2 rotationDirection = new Vector2();
@@ -25,9 +26,15 @@ public class RTSCameraBase : MonoBehaviour
     private float maxZoomOut = 200f;
     private float zoomSpeed = 7f;
     private float currentZoom = 5f;
-    public void InputMoveDirection(InputAction.CallbackContext context)
+
+    public void InputHorizontalMoveDirection(InputAction.CallbackContext context)
     {
-        moveDirection = context.ReadValue<Vector2>();
+        horizontalMoveDirection = context.ReadValue<Vector2>();
+    }
+
+    public void InputVerticalMoveDirection(InputAction.CallbackContext context)
+    {
+        verticalMoveDirection = context.ReadValue<float>();
     }
 
     public void InputRotationDirection(InputAction.CallbackContext context)
@@ -77,9 +84,10 @@ public class RTSCameraBase : MonoBehaviour
     void FixedUpdate()
     {
         var currentMoveSpeed = moveSpeed * Mathf.Sqrt(currentZoom);
-        var forwardMovement = transform.forward * moveDirection.y * currentMoveSpeed;
-        var sideMovement = transform.right * moveDirection.x * currentMoveSpeed;
-        transform.Translate(forwardMovement + sideMovement, Space.World);
+        var forwardMovement = transform.forward * horizontalMoveDirection.y * currentMoveSpeed;
+        var sideMovement = transform.right * horizontalMoveDirection.x * currentMoveSpeed;
+        var verticalMovement = transform.up * verticalMoveDirection * currentMoveSpeed;
+        transform.Translate(forwardMovement + sideMovement + verticalMovement, Space.World);
 
         if (rotationToggle)
         {
@@ -99,7 +107,7 @@ public class RTSCameraBase : MonoBehaviour
     {
         if (CameraHolderRef)
         {
-            currentZoom = Mathf.Clamp(Mathf.Abs(CameraHolderRef.localPosition.z) - zoomDirection*zoomSpeed * Time.deltaTime, 1f, maxZoomOut);
+            currentZoom = Mathf.Clamp(Mathf.Abs(CameraHolderRef.localPosition.z) - zoomDirection * zoomSpeed * Time.deltaTime, 1f, maxZoomOut);
             var zoomPos = new Vector3(CameraHolderRef.localPosition.x, CameraHolderRef.localPosition.y, -currentZoom);
             CameraHolderRef.localPosition = zoomPos;
         }
