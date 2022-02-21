@@ -14,10 +14,11 @@ public class RTSCameraBase : MonoBehaviour
 
     private Vector2 horizontalMoveDirection = new Vector2();
     private float verticalMoveDirection;
-    private float moveSpeed = 0.3f;
+    private float minMoveSpeed = 15f;
+    private float MaxmoveSpeed = 20f;
 
     private Vector2 rotationDirection = new Vector2();
-    private float rotationSpeed = 0.5f;
+    private float rotationSpeed = 30f;
     private bool invertVerticalRot = false;
     private bool inverthorizontalRot = false;
     private bool rotationToggle = false;
@@ -62,6 +63,7 @@ public class RTSCameraBase : MonoBehaviour
     void Start()
     {
         Setup();
+        //Cursor.lockState = CursorLockMode.Locked;
     }
 
     protected virtual void Setup()
@@ -77,13 +79,11 @@ public class RTSCameraBase : MonoBehaviour
             CameraHolderRef.transform.localPosition = new Vector3(0f, 0f, -defaultArmLength);
             currentZoom = defaultArmLength;
         }
-
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
-    void FixedUpdate()
+    private void Update()
     {
-        var currentMoveSpeed = moveSpeed * Mathf.Sqrt(currentZoom);
+        var currentMoveSpeed = minMoveSpeed * Mathf.Sqrt(currentZoom) * Time.deltaTime;
         var forwardMovement = transform.forward * horizontalMoveDirection.y * currentMoveSpeed;
         var sideMovement = transform.right * horizontalMoveDirection.x * currentMoveSpeed;
         var verticalMovement = transform.up * verticalMoveDirection * currentMoveSpeed;
@@ -91,20 +91,18 @@ public class RTSCameraBase : MonoBehaviour
 
         if (rotationToggle)
         {
+            var rotSpeed = rotationSpeed * Time.deltaTime;
             var rotX = inverthorizontalRot ? -rotationDirection.x : rotationDirection.x;
-            transform.Rotate(new Vector3(0f, rotX, 0f));
+            transform.Rotate(new Vector3(0f, rotX*rotSpeed, 0f));
 
             if (CameraPivotRef)
             {
                 var rotY = invertVerticalRot ? rotationDirection.y : -rotationDirection.y;
-                var verticalRot = Quaternion.Euler(CameraPivotRef.eulerAngles.x + rotY * rotationSpeed, 0f, 0f);
+                var verticalRot = Quaternion.Euler(CameraPivotRef.eulerAngles.x + (rotY * rotSpeed), 0f, 0f);
                 CameraPivotRef.localRotation = verticalRot;
             }
         }
-    }
 
-    private void Update()
-    {
         if (CameraHolderRef)
         {
             currentZoom = Mathf.Clamp(Mathf.Abs(CameraHolderRef.localPosition.z) - zoomDirection * zoomSpeed * Time.deltaTime, 1f, maxZoomOut);
@@ -117,7 +115,7 @@ public class RTSCameraBase : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(transform.position, 0.2f);
+        Gizmos.DrawSphere(transform.position, 1f);
         Gizmos.DrawRay(CameraHolderRef.position, CameraHolderRef.forward * 2f);
 
         Gizmos.color = Color.red;
