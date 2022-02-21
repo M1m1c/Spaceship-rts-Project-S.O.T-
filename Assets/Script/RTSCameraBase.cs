@@ -15,7 +15,11 @@ public class RTSCameraBase : MonoBehaviour
     private Vector2 horizontalMoveDirection = new Vector2();
     private float verticalMoveDirection;
     private float minMoveSpeed = 15f;
-    private float MaxmoveSpeed = 20f;
+    private float maxMoveSpeed = 20f;
+    private float moveVelocity = 0f;
+    private float moveAccelerationSpeed = 2f;
+    private float moveDecelerationSpeed = 3f;
+    private bool moveAccOrDec = false;
 
     private Vector2 rotationDirection = new Vector2();
     private float rotationSpeed = 30f;
@@ -30,7 +34,13 @@ public class RTSCameraBase : MonoBehaviour
 
     public void InputHorizontalMoveDirection(InputAction.CallbackContext context)
     {
-        horizontalMoveDirection = context.ReadValue<Vector2>();
+
+        if (context.performed)
+        {
+            moveAccOrDec = true;
+            horizontalMoveDirection = context.ReadValue<Vector2>();
+        }
+        else if (context.canceled) { moveAccOrDec = false; }
     }
 
     public void InputVerticalMoveDirection(InputAction.CallbackContext context)
@@ -83,17 +93,19 @@ public class RTSCameraBase : MonoBehaviour
 
     private void Update()
     {
-        var currentMoveSpeed = minMoveSpeed * Mathf.Sqrt(currentZoom) * Time.deltaTime;
+        UpdateMoveVelocity();
+        var currentMoveSpeed = (minMoveSpeed * moveVelocity) * Mathf.Sqrt(currentZoom) * Time.deltaTime;
         var forwardMovement = transform.forward * horizontalMoveDirection.y * currentMoveSpeed;
         var sideMovement = transform.right * horizontalMoveDirection.x * currentMoveSpeed;
+        var horizontalMovement = forwardMovement + sideMovement;
         var verticalMovement = transform.up * verticalMoveDirection * currentMoveSpeed;
-        transform.Translate(forwardMovement + sideMovement + verticalMovement, Space.World);
+        transform.Translate(horizontalMovement + verticalMovement, Space.World);
 
         if (rotationToggle)
         {
             var rotSpeed = rotationSpeed * Time.deltaTime;
             var rotX = inverthorizontalRot ? -rotationDirection.x : rotationDirection.x;
-            transform.Rotate(new Vector3(0f, rotX*rotSpeed, 0f));
+            transform.Rotate(new Vector3(0f, rotX * rotSpeed, 0f));
 
             if (CameraPivotRef)
             {
@@ -111,6 +123,13 @@ public class RTSCameraBase : MonoBehaviour
         }
     }
 
+    void UpdateMoveVelocity()
+    {
+        var proportionalDec = -(Time.deltaTime + (Time.deltaTime * (moveDecelerationSpeed * moveVelocity)));
+        var deceleration = moveVelocity > 0f ? proportionalDec : -Time.deltaTime;
+        var velocityChange = (moveAccOrDec ? Time.deltaTime * moveAccelerationSpeed : deceleration);
+        moveVelocity = Mathf.Clamp(moveVelocity + velocityChange, 0f, 1f);
+    }
 
     private void OnDrawGizmos()
     {
