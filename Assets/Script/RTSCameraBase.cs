@@ -26,6 +26,11 @@ public class RTSCameraBase : MonoBehaviour
     private bool invertVerticalRot = false;
     private bool inverthorizontalRot = false;
     private bool rotationToggle = false;
+    private float rotVelocity = 0f;
+    private float rotAccelerationSpeed = 5f;
+    private float rotDecelerationSpeed = 4.5f;
+    private bool rotAccOrDec = false;
+
 
     private float zoomDirection = 0;
     private float maxZoomOut = 200f;
@@ -50,13 +55,24 @@ public class RTSCameraBase : MonoBehaviour
 
     public void InputRotationDirection(InputAction.CallbackContext context)
     {
-        rotationDirection = context.ReadValue<Vector2>();
+
+        if (context.performed && rotationToggle)
+        {
+            rotAccOrDec = true;
+            rotationDirection = context.ReadValue<Vector2>();
+        }
+        else if (context.canceled)
+        { rotAccOrDec = false; }
     }
 
     public void InputRotationToggle(InputAction.CallbackContext context)
     {
         if (context.performed) { rotationToggle = true; }
-        else if (context.canceled) { rotationToggle = false; }
+        else if (context.canceled)
+        {
+            rotationToggle = false;
+            rotAccOrDec = false;
+        }
     }
 
     public void InputZoomDirection(InputAction.CallbackContext context)
@@ -94,27 +110,30 @@ public class RTSCameraBase : MonoBehaviour
     private void Update()
     {
         UpdateMoveVelocity();
-        var currentMoveSpeed = (minMoveSpeed * moveVelocity) * Mathf.Sqrt(currentZoom) * Time.deltaTime;
-        var forwardMovement = transform.forward * horizontalMoveDirection.y * currentMoveSpeed;
-        var sideMovement = transform.right * horizontalMoveDirection.x * currentMoveSpeed;
+        var currentHorizontalMoveSpeed = (minMoveSpeed * moveVelocity) * Mathf.Sqrt(currentZoom) * Time.deltaTime;
+        //TODO implement velocity and acceleration for vertical movement too
+        var currentVerticalMoveSpeed = minMoveSpeed * Mathf.Sqrt(currentZoom) * Time.deltaTime;
+        var forwardMovement = transform.forward * horizontalMoveDirection.y * currentHorizontalMoveSpeed;
+        var sideMovement = transform.right * horizontalMoveDirection.x * currentHorizontalMoveSpeed;
         var horizontalMovement = forwardMovement + sideMovement;
-        var verticalMovement = transform.up * verticalMoveDirection * currentMoveSpeed;
+        var verticalMovement = transform.up * verticalMoveDirection * currentVerticalMoveSpeed;
         transform.Translate(horizontalMovement + verticalMovement, Space.World);
 
-        if (rotationToggle)
-        {
-            var rotSpeed = rotationSpeed * Time.deltaTime;
-            var rotX = inverthorizontalRot ? -rotationDirection.x : rotationDirection.x;
-            transform.Rotate(new Vector3(0f, rotX * rotSpeed, 0f));
 
-            if (CameraPivotRef)
-            {
-                var rotY = invertVerticalRot ? rotationDirection.y : -rotationDirection.y;
-                var verticalRot = Quaternion.Euler(CameraPivotRef.eulerAngles.x + (rotY * rotSpeed), 0f, 0f);
-                CameraPivotRef.localRotation = verticalRot;
-            }
+        UpdateRotVelocity();
+        var rotSpeed = (rotationSpeed * rotVelocity) * Time.deltaTime;
+        var rotX = inverthorizontalRot ? -rotationDirection.x : rotationDirection.x;
+        transform.Rotate(new Vector3(0f, rotX * rotSpeed, 0f));
+
+        if (CameraPivotRef)
+        {
+            var rotY = invertVerticalRot ? rotationDirection.y : -rotationDirection.y;
+            var verticalRot = Quaternion.Euler(CameraPivotRef.eulerAngles.x + (rotY * rotSpeed), 0f, 0f);
+            CameraPivotRef.localRotation = verticalRot;
         }
 
+
+        //TODO implement velocity and acceleration for zoom too
         if (CameraHolderRef)
         {
             currentZoom = Mathf.Clamp(Mathf.Abs(CameraHolderRef.localPosition.z) - zoomDirection * zoomSpeed * Time.deltaTime, 1f, maxZoomOut);
@@ -125,10 +144,32 @@ public class RTSCameraBase : MonoBehaviour
 
     void UpdateMoveVelocity()
     {
-        var proportionalDec = -(Time.deltaTime + (Time.deltaTime * (moveDecelerationSpeed * moveVelocity)));
-        var deceleration = moveVelocity > 0f ? proportionalDec : -Time.deltaTime;
-        var velocityChange = (moveAccOrDec ? Time.deltaTime * moveAccelerationSpeed : deceleration);
+        var velocityChange = GetVelocityChange(
+            moveVelocity,
+            moveDecelerationSpeed,
+            moveAccelerationSpeed,
+            moveAccOrDec);
+
         moveVelocity = Mathf.Clamp(moveVelocity + velocityChange, 0f, 1f);
+    }
+
+    void UpdateRotVelocity()
+    {
+        var velocityChange = GetVelocityChange(
+            rotVelocity,
+            rotDecelerationSpeed,
+            rotAccelerationSpeed,
+            rotationToggle && rotAccOrDec);
+
+        rotVelocity = Mathf.Clamp(rotVelocity + velocityChange, 0f, 1f);
+    }
+
+    private float GetVelocityChange(float velocity,float decelerationSpeed,float accelerationSpeed,bool changeCondition)
+    {
+        var proportionalDec = -(Time.deltaTime + (Time.deltaTime * (decelerationSpeed * velocity)));
+        var deceleration = velocity > 0f ? proportionalDec : -Time.deltaTime;
+        var velocityChange = (changeCondition ? Time.deltaTime * accelerationSpeed : deceleration);
+        return velocityChange;
     }
 
     private void OnDrawGizmos()
