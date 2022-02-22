@@ -16,10 +16,12 @@ public class RTSCameraBase : MonoBehaviour
     private float verticalMoveDirection;
     private float minMoveSpeed = 15f;
     private float maxMoveSpeed = 20f;
-    private float moveVelocity = 0f;
+    private float moveVelocityHorizontal = 0f;
+    private bool moveAccOrDecHorizontal = false;
+    private float moveVelocityVertical = 0f;
+    private bool moveAccOrDecVertical = false;
     private float moveAccelerationSpeed = 2f;
     private float moveDecelerationSpeed = 3f;
-    private bool moveAccOrDec = false;
 
     private Vector2 rotationDirection = new Vector2();
     private float rotationSpeed = 30f;
@@ -46,15 +48,21 @@ public class RTSCameraBase : MonoBehaviour
 
         if (context.performed)
         {
-            moveAccOrDec = true;
+            moveAccOrDecHorizontal = true;
             horizontalMoveDirection = context.ReadValue<Vector2>();
         }
-        else if (context.canceled) { moveAccOrDec = false; }
+        else if (context.canceled) { moveAccOrDecHorizontal = false; }
     }
 
     public void InputVerticalMoveDirection(InputAction.CallbackContext context)
     {
-        verticalMoveDirection = context.ReadValue<float>();
+
+        if (context.performed)
+        {
+            moveAccOrDecVertical = true;
+            verticalMoveDirection = context.ReadValue<float>();
+        }
+        else if (context.canceled) { moveAccOrDecVertical = false; }
     }
 
     public void InputRotationDirection(InputAction.CallbackContext context)
@@ -123,9 +131,8 @@ public class RTSCameraBase : MonoBehaviour
     private void Update()
     {
         UpdateMoveVelocity();
-        var currentHorizontalMoveSpeed = (minMoveSpeed * moveVelocity) * Mathf.Sqrt(currentZoom) * Time.deltaTime;
-        //TODO implement velocity and acceleration for vertical movement too
-        var currentVerticalMoveSpeed = minMoveSpeed * Mathf.Sqrt(currentZoom) * Time.deltaTime;
+        var currentHorizontalMoveSpeed = (minMoveSpeed * moveVelocityHorizontal) * Mathf.Sqrt(currentZoom) * Time.deltaTime;
+        var currentVerticalMoveSpeed = (minMoveSpeed*moveVelocityVertical) * Mathf.Sqrt(currentZoom) * Time.deltaTime;
         var forwardMovement = transform.forward * horizontalMoveDirection.y * currentHorizontalMoveSpeed;
         var sideMovement = transform.right * horizontalMoveDirection.x * currentHorizontalMoveSpeed;
         var horizontalMovement = forwardMovement + sideMovement;
@@ -158,13 +165,22 @@ public class RTSCameraBase : MonoBehaviour
 
     void UpdateMoveVelocity()
     {
-        var velocityChange = GetVelocityChange(
-            moveVelocity,
+        var velocityChangeHorizontal = GetVelocityChange(
+            moveVelocityHorizontal,
             moveDecelerationSpeed,
             moveAccelerationSpeed,
-            moveAccOrDec);
+            moveAccOrDecHorizontal);
 
-        moveVelocity = Mathf.Clamp(moveVelocity + velocityChange, 0f, 1f);
+        moveVelocityHorizontal = Mathf.Clamp(moveVelocityHorizontal + velocityChangeHorizontal, 0f, 1f);
+
+
+        var velocityChangeVertical = GetVelocityChange(
+            moveVelocityVertical,
+            moveDecelerationSpeed,
+            moveAccelerationSpeed,
+            moveAccOrDecVertical);
+
+        moveVelocityVertical = Mathf.Clamp(moveVelocityVertical + velocityChangeVertical, 0f, 1f);
     }
 
     void UpdateRotVelocity()
