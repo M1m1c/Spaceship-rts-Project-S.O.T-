@@ -36,6 +36,10 @@ public class RTSCameraBase : MonoBehaviour
     private float maxZoomOut = 200f;
     private float zoomSpeed = 7f;
     private float currentZoom = 5f;
+    private float zoomVelocity = 0f;
+    private float zoomAccelerationSpeed = 8f;
+    private float zoomDecelerationSpeed = 3f;
+    private bool zoomAccOrDec = false;
 
     public void InputHorizontalMoveDirection(InputAction.CallbackContext context)
     {
@@ -77,7 +81,16 @@ public class RTSCameraBase : MonoBehaviour
 
     public void InputZoomDirection(InputAction.CallbackContext context)
     {
-        zoomDirection = context.ReadValue<float>();
+        var direction = context.ReadValue<float>();
+        if (direction > 0f || direction < 0f)
+        {
+            zoomAccOrDec = true;
+            zoomDirection = direction;
+        }
+        else if (direction == 0f)
+        {
+            zoomAccOrDec = false;
+        }
     }
 
 
@@ -133,10 +146,11 @@ public class RTSCameraBase : MonoBehaviour
         }
 
 
-        //TODO implement velocity and acceleration for zoom too
         if (CameraHolderRef)
         {
-            currentZoom = Mathf.Clamp(Mathf.Abs(CameraHolderRef.localPosition.z) - zoomDirection * zoomSpeed * Time.deltaTime, 1f, maxZoomOut);
+            UpdatezoomVelocity();
+            var zoomChange = (zoomSpeed * zoomVelocity) * Time.deltaTime;
+            currentZoom = Mathf.Clamp(Mathf.Abs(CameraHolderRef.localPosition.z) - zoomDirection * zoomChange, 1f, maxZoomOut);
             var zoomPos = new Vector3(CameraHolderRef.localPosition.x, CameraHolderRef.localPosition.y, -currentZoom);
             CameraHolderRef.localPosition = zoomPos;
         }
@@ -164,7 +178,18 @@ public class RTSCameraBase : MonoBehaviour
         rotVelocity = Mathf.Clamp(rotVelocity + velocityChange, 0f, 1f);
     }
 
-    private float GetVelocityChange(float velocity,float decelerationSpeed,float accelerationSpeed,bool changeCondition)
+    void UpdatezoomVelocity()
+    {
+        var velocityChange = GetVelocityChange(
+            zoomVelocity,
+            zoomDecelerationSpeed,
+            zoomAccelerationSpeed,
+            zoomAccOrDec);
+
+        zoomVelocity = Mathf.Clamp(zoomVelocity + velocityChange, 0f, 1f);
+    }
+
+    private float GetVelocityChange(float velocity, float decelerationSpeed, float accelerationSpeed, bool changeCondition)
     {
         var proportionalDec = -(Time.deltaTime + (Time.deltaTime * (decelerationSpeed * velocity)));
         var deceleration = velocity > 0f ? proportionalDec : -Time.deltaTime;
