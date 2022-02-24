@@ -163,7 +163,7 @@ public class RTSCameraBase : MonoBehaviour
         }
     }
 
-    void UpdateMoveVelocity()
+    private void UpdateMoveVelocity()
     {
         var velocityChangeHorizontal = GetVelocityChange(
             moveVelocityHorizontal,
@@ -183,7 +183,7 @@ public class RTSCameraBase : MonoBehaviour
         moveVelocityVertical = Mathf.Clamp(moveVelocityVertical + velocityChangeVertical, 0f, 1f);
     }
 
-    void UpdateRotVelocity()
+    private void UpdateRotVelocity()
     {
         var velocityChange = GetVelocityChange(
             rotVelocity,
@@ -194,7 +194,7 @@ public class RTSCameraBase : MonoBehaviour
         rotVelocity = Mathf.Clamp(rotVelocity + velocityChange, 0f, 1f);
     }
 
-    void UpdatezoomVelocity()
+    private void UpdatezoomVelocity()
     {
         var velocityChange = GetVelocityChange(
             zoomVelocity,
