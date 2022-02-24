@@ -72,6 +72,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3735458143336373735}
   - component: {fileID: 3735458143336373734}
+  - component: {fileID: 1916376007643429813}
+  - component: {fileID: 7712089219962575203}
   - component: {fileID: 3735458143336373721}
   m_Layer: 0
   m_Name: RTSCameraRoot
@@ -105,6 +107,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6ba37b5ed5501f94086304eb718c10b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1916376007643429813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3735458143336373732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c252056ec7ff84247a97298d8e946bef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SelectBoxPrefab: {fileID: 8733461554078591686, guid: be0a6903693a9f5468fccbc65320d0b0, type: 3}
+--- !u!114 &7712089219962575203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3735458143336373732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fff4e25a243fff24588f64658dc7ffa4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &3735458143336373721
@@ -212,6 +239,70 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: e30dd1fc-f6c7-43a8-a44d-415249ddff7a
     m_ActionName: GameCamera/MoveVertical[/Keyboard/z,/Keyboard/x]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1916376007643429813}
+        m_TargetAssemblyTypeName: SelectionController, Assembly-CSharp
+        m_MethodName: InputSelectStart
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 782c8ae2-1520-4a56-8170-7f7dc3e76acc
+    m_ActionName: GameCamera/SelectSingle[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1916376007643429813}
+        m_TargetAssemblyTypeName: SelectionController, Assembly-CSharp
+        m_MethodName: InputSelectMultiple
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 6df0f165-e6c2-4a03-be28-5f8493738193
+    m_ActionName: GameCamera/SelectMultiple[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1916376007643429813}
+        m_TargetAssemblyTypeName: SelectionController, Assembly-CSharp
+        m_MethodName: InputSelectFinish
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: f1b31d5e-366b-4842-a5b4-f386c55264ff
+    m_ActionName: GameCamera/SelectFinish[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1916376007643429813}
+        m_TargetAssemblyTypeName: SelectionController, Assembly-CSharp
+        m_MethodName: InputSelectModifier
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 9c479744-d638-4b39-ba49-afa77b573c2e
+    m_ActionName: GameCamera/InputModifierShift[/Keyboard/shift]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: GameCamera
