@@ -49,6 +49,42 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "SelectStart",
+                    "type": "Button",
+                    "id": "782c8ae2-1520-4a56-8170-7f7dc3e76acc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectMultiple",
+                    "type": "Button",
+                    "id": "6df0f165-e6c2-4a03-be28-5f8493738193",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold(duration=0.05)",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectFinish",
+                    "type": "Button",
+                    "id": "f1b31d5e-366b-4842-a5b4-f386c55264ff",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(behavior=1)",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectModifier",
+                    "type": "Button",
+                    "id": "9c479744-d638-4b39-ba49-afa77b573c2e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -227,6 +263,50 @@
                     "action": "MoveVertical",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "0291e683-f7bd-4b71-89e6-44ab3066c42e",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectStart",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7881a87e-72f1-4127-b3bd-ca34c22f63cc",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectMultiple",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2aff7868-1127-422d-b034-81010db2b5fa",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectFinish",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b87b8ab9-f6be-4da7-b1e3-34decbf1f04d",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectModifier",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
