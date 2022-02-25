@@ -122,6 +122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SelectBoxPrefab: {fileID: 8733461554078591686, guid: be0a6903693a9f5468fccbc65320d0b0, type: 3}
+  selectionBoxPrefab: {fileID: 8194434223598040869, guid: 3f3ca7bbd851cd64c983aa8561d1b964, type: 3}
 --- !u!114 &7712089219962575203
 MonoBehaviour:
   m_ObjectHideFlags: 0
