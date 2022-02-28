@@ -13,7 +13,7 @@ public class SelectionCollection : MonoBehaviour
         if (SelectedEnteties.ContainsKey(id)) { return; }
 
         SelectedEnteties.Add(id, entity);
-        entity.gameObject.AddComponent<SelectedComp>();
+        entity.OnSelected();
     }
 
     public int DeselectEntity(SelectableEntity entity, bool removeID)
@@ -21,7 +21,7 @@ public class SelectionCollection : MonoBehaviour
 
         int id = entity.gameObject.GetInstanceID();
         if (!SelectedEnteties.ContainsKey(id)) { return -1; }
-        entity.GetComponent<SelectedComp>().DeSelect();
+        entity.DeSelect();
 
         if (removeID)
         {

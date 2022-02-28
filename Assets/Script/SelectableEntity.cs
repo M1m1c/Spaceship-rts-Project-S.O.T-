@@ -4,15 +4,21 @@ using UnityEngine;
 
 public class SelectableEntity : MonoBehaviour
 {
-    // Start is called before the first frame update
+    private Color startcol;
+    private Renderer myRenderer;
     void Start()
     {
-        
+        myRenderer = gameObject.GetComponent<Renderer>();
+        startcol = myRenderer.material.color;    
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnSelected()
     {
-        
+        myRenderer.material.color = Color.green;
+    }
+
+    public void DeSelect()
+    {
+        myRenderer.material.color = startcol;
     }
 }
