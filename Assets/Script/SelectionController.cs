@@ -20,7 +20,8 @@ public class SelectionController : MonoBehaviour
     private bool isMultiSelection = false;
     private bool selectModifier = false;
 
-    private float minSelectionBoxSize = 35f;
+    private float minMultiSelectionSize = 35f;
+    private float minValidDrawSize = 10f;
 
     private Vector3[] boxCorners = new Vector3[4];
     private float selectDistance = 1000f;
@@ -53,10 +54,10 @@ public class SelectionController : MonoBehaviour
         if (!selectModifier)
         {
             selectionCollection.DeselectAllEntties();
-        } 
+        }
 
         var selectionSize = selectBox.sizeDelta.magnitude;
-        var notLargeEnough = selectionSize < minSelectionBoxSize;
+        var notLargeEnough = selectionSize < minMultiSelectionSize;
 
         if (notLargeEnough)
         {
@@ -115,12 +116,11 @@ public class SelectionController : MonoBehaviour
     {
         List<Vector3> startPoints = new List<Vector3>();
         List<Vector3> endPoints = new List<Vector3>();
-        var cam = Camera.main.transform;
-        var matrix= Matrix4x4.TRS(cam.position, cam.rotation, cam.lossyScale);
+       
         for (int i = 0; i < corners.Length; i++)
         {
             var point = Camera.main.ScreenPointToRay(corners[i]);
-            var startPos = point.origin;//matrix.MultiplyPoint3x4(point.origin);
+            var startPos = point.origin;
             var endPos = startPos + point.direction * selectDistance;
             startPoints.Add(startPos);
             endPoints.Add(endPos);
@@ -151,7 +151,7 @@ public class SelectionController : MonoBehaviour
             var script = selectionBox.GetComponent<SelectionBox3D>();
             script.SelectionChanged.AddListener(selectionCollection.AddSelectedEntity);
         }
-        
+
 
         if (selectBox)
         {
@@ -179,6 +179,12 @@ public class SelectionController : MonoBehaviour
 
             float sizeX = Mathf.Abs(squareStartPos.x - squareEndPos.x);
             float sizeY = Mathf.Abs(squareStartPos.y - squareEndPos.y);
+
+
+            var xTooSmall = sizeX < minValidDrawSize || sizeX > -minValidDrawSize;
+            var yTooSmall = sizeY < minValidDrawSize || sizeY > -minValidDrawSize;
+            if (xTooSmall) { sizeX += minValidDrawSize; }
+            if (yTooSmall) { sizeY += minValidDrawSize; }
 
             selectBox.sizeDelta = new Vector2(sizeX, sizeY);
 
