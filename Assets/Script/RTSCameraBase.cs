@@ -24,7 +24,7 @@ public class RTSCameraBase : MonoBehaviour
     private float moveDecelerationSpeed = 3f;
 
     private Vector2 rotationDirection = new Vector2();
-    private float rotationSpeed = 30f;
+    private float rotationSpeed = 25f;
     private bool invertVerticalRot = false;
     private bool inverthorizontalRot = false;
     private bool rotationToggle = false;
