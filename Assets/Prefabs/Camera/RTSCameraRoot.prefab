@@ -122,7 +122,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SelectBoxPrefab: {fileID: 8733461554078591686, guid: be0a6903693a9f5468fccbc65320d0b0, type: 3}
-  selectionBoxPrefab: {fileID: 8194434223598040869, guid: 3f3ca7bbd851cd64c983aa8561d1b964, type: 3}
+  SelectionBoxPrefab: {fileID: 8194434223598040869, guid: 3f3ca7bbd851cd64c983aa8561d1b964, type: 3}
+  OrderBeaconPrefab: {fileID: 3000503342582635151, guid: 60b0190087ff44442b1c5e3b88b28ad1, type: 3}
+  groupOriginPrefab: {fileID: 8468235554063749574, guid: 442c83c45a3d76540b8f31f19426cc06, type: 3}
 --- !u!114 &7712089219962575203
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -181,6 +183,18 @@ MonoBehaviour:
       - m_Target: {fileID: 3735458143336373734}
         m_TargetAssemblyTypeName: RTSCameraBase, Assembly-CSharp
         m_MethodName: InputRotationDirection
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1916376007643429813}
+        m_TargetAssemblyTypeName: SelectionController, Assembly-CSharp
+        m_MethodName: InputBeaconYChange
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -304,6 +318,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 9c479744-d638-4b39-ba49-afa77b573c2e
     m_ActionName: GameCamera/InputModifierShift[/Keyboard/shift]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1916376007643429813}
+        m_TargetAssemblyTypeName: SelectionController, Assembly-CSharp
+        m_MethodName: InputMoveOrderEngage
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 837c42ed-cdf3-4979-b61c-13e29ab2797c
+    m_ActionName: GameCamera/MoveOrder[/Mouse/rightButton]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: GameCamera

@@ -7,9 +7,12 @@ public class SelectionController : MonoBehaviour
 {
 
     public GameObject SelectBoxPrefab;
+    public MeshCollider SelectionBoxPrefab;
+    public Transform OrderBeaconPrefab;
+    public GroupOrigin groupOriginPrefab;
+
     private RectTransform selectBox;
     private MeshCollider selectionBox;
-    public MeshCollider selectionBoxPrefab;
 
     private SelectionCollection selectionCollection;
 
@@ -25,6 +28,18 @@ public class SelectionController : MonoBehaviour
 
     private Vector3[] boxCorners = new Vector3[4];
     private float selectDistance = 1000f;
+    private int[] tris = { 0, 1, 2, 2, 1, 3, 4, 6, 0, 0, 6, 2, 6, 7, 2, 2, 7, 3, 7, 5, 3, 3, 5, 1, 5, 0, 1, 1, 4, 0, 4, 5, 6, 6, 5, 7 };
+
+
+    private int orderStage = 0;
+
+    private GroupOrigin currentGroupOrigin;
+    private Transform currentOrderBeacon;
+    private Plane beaconGroundPlane;
+    private float beaconYDirection = 0f;
+    private float beaconYLevel = 0f;
+    private float beaconYSpeed = 7f;
+    private Vector2 savedCursorPosition;
 
     public void InputSelectStart(InputAction.CallbackContext context)
     {
@@ -53,7 +68,7 @@ public class SelectionController : MonoBehaviour
 
         if (!selectModifier)
         {
-            selectionCollection.DeselectAllEntties();
+            ClearSelection();
         }
 
         var selectionSize = selectBox.sizeDelta.magnitude;
@@ -86,7 +101,6 @@ public class SelectionController : MonoBehaviour
         }
         else
         {
-            //selectBox.GetWorldCorners(corners);
             var selectionMesh = GenerateSelectionBoxMesh();
             selectionBox.sharedMesh = selectionMesh;
             selectionBox.enabled = true;
@@ -94,6 +108,101 @@ public class SelectionController : MonoBehaviour
             StartCoroutine(WaitForDisableSelectionBox());
         }
 
+    }
+
+    public void InputSelectModifier(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            if (orderStage != 0)
+            {
+                savedCursorPosition = Mouse.current.position.ReadValue();
+                Cursor.visible = false;
+            }
+
+            selectModifier = true;
+        }
+        else if (context.canceled)
+        {
+            if (orderStage != 0)
+            {
+
+                Mouse.current.WarpCursorPosition(savedCursorPosition);
+                Cursor.visible = true;
+            }
+
+            selectModifier = false;
+        }
+    }
+
+
+    public void InputMoveOrderEngage(InputAction.CallbackContext context)
+    {
+        if (!context.performed) { return; }
+        var selectedCount = selectionCollection.SelectedEnteties.Count;
+        if (selectedCount == 0) { return; }
+
+        if (orderStage == 0)
+        {      
+            SetupAnOrder(selectedCount);
+        }
+        else if (orderStage == 1)
+        {
+            //FinishAnOrder()
+            //TODO order all selected units to move to this beacon
+            foreach (var pair in selectionCollection.SelectedEnteties)
+            {
+                pair.Value.MyOrderBeacon = currentOrderBeacon;
+            }
+            currentOrderBeacon = null;
+            ClearSelection();
+        }
+    }
+
+    public void InputBeaconYChange(InputAction.CallbackContext context)
+    {
+        if (!selectModifier) { return; }
+        beaconYDirection = -context.ReadValue<Vector2>().y;
+    }
+
+    private void ClearSelection()
+    {
+        selectionCollection.DeselectAllEntties();
+        beaconYLevel = 0f;
+        orderStage = 0;
+        currentGroupOrigin.MyOrderBeacon = null;
+
+        if (currentOrderBeacon != null)
+        {
+            Destroy(currentOrderBeacon.gameObject);
+        }
+    }
+    private void SetupAnOrder(int selectedCount)
+    {
+        orderStage = 1;
+        currentOrderBeacon = Instantiate(OrderBeaconPrefab);
+
+        var averageX = 0f;
+        var averageY = 0f;
+        var averageZ = 0f;
+        foreach (var pair in selectionCollection.SelectedEnteties)
+        {
+            var pos = pair.Value.transform.position;
+            averageX += pos.x;
+            averageY += pos.y;
+            averageZ += pos.z;
+        }
+
+        averageX = averageX / (float)selectedCount;
+        beaconYLevel = averageY / (float)selectedCount;
+        averageZ = averageZ / (float)selectedCount;
+
+        var planePos = new Vector3(averageX, beaconYLevel, averageZ);
+        currentOrderBeacon.transform.position = planePos;
+        currentGroupOrigin.transform.position = planePos;
+        currentGroupOrigin.MyOrderBeacon = currentOrderBeacon;
+
+        beaconGroundPlane = new Plane(Vector3.up, planePos);
     }
 
     private IEnumerator WaitForDisableSelectionBox()
@@ -105,7 +214,6 @@ public class SelectionController : MonoBehaviour
     private Mesh GenerateSelectionBoxMesh()
     {
         var verts = GetBoxVertecies(boxCorners);
-        int[] tris = { 0, 1, 2, 2, 1, 3, 4, 6, 0, 0, 6, 2, 6, 7, 2, 2, 7, 3, 7, 5, 3, 3, 5, 1, 5, 0, 1, 1, 4, 0, 4, 5, 6, 6, 5, 7 };
         Mesh selectionMesh = new Mesh();
         selectionMesh.vertices = verts;
         selectionMesh.triangles = tris;
@@ -116,7 +224,7 @@ public class SelectionController : MonoBehaviour
     {
         List<Vector3> startPoints = new List<Vector3>();
         List<Vector3> endPoints = new List<Vector3>();
-       
+
         for (int i = 0; i < corners.Length; i++)
         {
             var point = Camera.main.ScreenPointToRay(corners[i]);
@@ -132,20 +240,13 @@ public class SelectionController : MonoBehaviour
         return verts.ToArray();
     }
 
-    public void InputSelectModifier(InputAction.CallbackContext context)
-    {
-        if (context.performed) { selectModifier = true; }
-        else if (context.canceled) { selectModifier = false; }
-    }
-
-
     private void Start()
     {
         selectionCollection = GetComponent<SelectionCollection>();
 
-        if (selectionBoxPrefab)
+        if (SelectionBoxPrefab)
         {
-            selectionBox = Instantiate(selectionBoxPrefab, Vector3.zero, Quaternion.identity);
+            selectionBox = Instantiate(SelectionBoxPrefab, Vector3.zero, Quaternion.identity);
             selectionBox.convex = true;
             selectionBox.isTrigger = true;
             var script = selectionBox.GetComponent<SelectionBox3D>();
@@ -165,6 +266,9 @@ public class SelectionController : MonoBehaviour
             selectBox = Instantiate(SelectBoxPrefab, canvas.transform, false).GetComponent<RectTransform>();
             selectBox.gameObject.SetActive(false);
         }
+
+        if (groupOriginPrefab) { currentGroupOrigin = Instantiate(groupOriginPrefab); }
+
     }
     private void Update()
     {
@@ -190,6 +294,28 @@ public class SelectionController : MonoBehaviour
 
             selectBox.GetWorldCorners(boxCorners);
         }
+
+        if (currentOrderBeacon != null)
+        {
+            if (selectModifier == false)
+            {
+                var mPos = Mouse.current.position.ReadValue();
+                Ray ray = Camera.main.ScreenPointToRay(mPos);
+                float distance = 0;
+                if (beaconGroundPlane.Raycast(ray, out distance))
+                {
+                    var point = ray.GetPoint(distance);
+                    currentOrderBeacon.position = new Vector3(point.x, currentOrderBeacon.position.y, point.z);
+                }
+            }
+            else
+            {
+                beaconYLevel = (beaconYDirection * beaconYSpeed) * Time.deltaTime;
+                currentOrderBeacon.position += new Vector3(0f, beaconYLevel, 0f);
+                Mouse.current.WarpCursorPosition(savedCursorPosition);
+            }
+        }
+
     }
 
     private void OnDrawGizmos()

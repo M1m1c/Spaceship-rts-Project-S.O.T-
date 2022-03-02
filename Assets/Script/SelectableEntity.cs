@@ -4,13 +4,26 @@ using UnityEngine;
 
 public class SelectableEntity : MonoBehaviour
 {
+
+    private Transform myOrderBeacon;
+
+    public Transform MyOrderBeacon
+    {
+        get { return myOrderBeacon; }
+        set { myOrderBeacon = value; }
+    }
+
+    public Material LineMaterial;
+
     private Color startcol;
     private Renderer myRenderer;
+
     void Start()
     {
         myRenderer = gameObject.GetComponent<Renderer>();
-        startcol = myRenderer.material.color;    
+        startcol = myRenderer.material.color;
     }
+
 
     public void OnSelected()
     {
