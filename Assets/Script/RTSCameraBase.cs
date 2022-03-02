@@ -110,7 +110,7 @@ public class RTSCameraBase : MonoBehaviour
     void Start()
     {
         Setup();
-        //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Confined;
     }
 
     protected virtual void Setup()
