@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovementComp : MonoBehaviour
+public class MovementComp : UnitMovement
 {
 
 
@@ -12,7 +12,10 @@ public class MovementComp : MonoBehaviour
         set
         {
             target = value;
-            rb.velocity = Vector3.zero;
+            if (reachedHorizontalTarget)//or the rotation is too large
+            {
+                travelVelocity = 0f;
+            }
             rotationProgress = 0f;
             reachedHorizontalTarget = false;
             reachedVerticalTarget = false;
@@ -39,8 +42,8 @@ public class MovementComp : MonoBehaviour
 
     //TODO set these using scriptabel object for each unit
     private float rotationSpeed = 0.1f;
-    private float travelAngle = 0.7f;
-    private float travelSpeed = 30f;
+    private float travelAngle = 0.5f;
+    private float travelSpeed = 50f;
     private float travelDecelerationSpeed = 0.99f;
     private float travelAccelerationSpeed = 1f;
 
@@ -82,32 +85,42 @@ public class MovementComp : MonoBehaviour
         //    }
         //}
 
-        //Large ship movement
+        //TODO rework rotational to be able to update dynamically better
+        //Dont use lerp use math instead
+        //Large ship movement     
         if (rotationProgress != 1f)
         {
             rotationProgress += Time.fixedDeltaTime * rotationSpeed;
             rotationProgress = Mathf.Clamp01(rotationProgress);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationProgress);
+            //transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationProgress);
         }
+
+        targetDirection = Target.transform.position - transform.position;
+        var rotationDirection = Vector3.RotateTowards(transform.forward, targetDirection, 360f, 1f);
+        targetRotation = Quaternion.LookRotation(rotationDirection);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.fixedDeltaTime * travelSpeed+((travelSpeed*0.1f)*travelVelocity));
+    
+
 
         //if (Vector3.Distance(transform.position, Target.transform.position) < 1f)
         //{
         //    rb.velocity = Vector3.zero;
         //}
 
-        //if (!reachedVerticalTarget)
-        //{
-        //    if (!Mathf.Approximately(transform.position.y, Target.transform.position.y))
-        //    {
-        //        var verticalDir = new Vector3(0f, targetDirection.y, 0f).normalized;
-        //        rb.AddForce(verticalDir * (travelSpeed) * Time.fixedDeltaTime);
-        //    }
-        //    else
-        //    {
-        //        rb.velocity.Set(rb.velocity.x, 0f, rb.velocity.z);
-        //        reachedVerticalTarget = true;
-        //    }
-        //}
+        if (!reachedVerticalTarget)
+        {
+            var vPos = new Vector3(0f, transform.position.y, 0f);
+            var vTargetPos = new Vector3(0f, Target.transform.position.y, 0f);
+            var verticalDistance = Vector3.Distance(vPos, vTargetPos);
+
+            if (verticalDistance < 1f)
+            {
+                reachedVerticalTarget = true;
+            }
+
+            var verticalDir = new Vector3(0f, targetDirection.y, 0f).normalized;
+            transform.position += verticalDir * (travelSpeed * 0.3f) * Time.fixedDeltaTime;
+        }
 
         if (!reachedHorizontalTarget)
         {
@@ -119,13 +132,18 @@ public class MovementComp : MonoBehaviour
             {
                 reachedHorizontalTarget = true;
             }
-
-            if (Vector3.Dot(transform.forward, targetDirection) >= travelAngle)
-            {
-                UpdateTravelVelocity();
-                var horizontalDir = new Vector3(targetDirection.x, 0f, targetDirection.z).normalized;
-                transform.position += horizontalDir * (travelSpeed * travelVelocity) * Time.fixedDeltaTime;
-            }
+            UpdateTravelVelocity();
+            var horizontalDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
+            transform.position += horizontalDir * (travelSpeed * travelVelocity) * Time.fixedDeltaTime;
+            //if (Vector3.Dot(transform.forward, targetDirection) >= travelAngle)
+            //{
+            //    UpdateTravelVelocity();
+            //    //small ship movement
+            //    var horizontalDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized; //new Vector3(targetDirection.x, 0f, targetDirection.z).normalized;
+            //    //Large ship movement
+            //    //var horizontalDir = new Vector3(targetDirection.x, 0f, targetDirection.z).normalized;
+            //    transform.position += horizontalDir * (travelSpeed * travelVelocity) * Time.fixedDeltaTime;
+            //}
         }
 
 
@@ -135,14 +153,8 @@ public class MovementComp : MonoBehaviour
     private void UpdateTravelVelocity()
     {
         var currentDist = Vector3.Distance(transform.position, Target.transform.position);
-        var decelDist = targetDistance * 0.1f;
+        var decelDist = targetDistance * 0.2f;
 
-
-        //var velocityChange = VelocityCalc.GetVelocityChangeFixed(
-        //    travelVelocity,
-        //    (travelVelocity * travelVelocity) / (2f * proportionalDec - travelVelocity * Time.fixedDeltaTime),
-        //    travelAccelerationSpeed,
-        //    proportionalDec <= currentDist);
         var velocityChange = VelocityCalc.GetVelocityChangeBasedOnDistFixed(
             travelVelocity,
             travelDecelerationSpeed,
@@ -151,6 +163,48 @@ public class MovementComp : MonoBehaviour
             decelDist <= currentDist);
 
         travelVelocity = Mathf.Clamp(travelVelocity + velocityChange, 0f, 1f);
+    }
+
+    protected override void MoveUnitToTarget()
+    {
+        if (rb == null) { return; }
+        if (Target == null) { return; }
+       
+        targetDirection = Target.transform.position - transform.position;
+        var rotationDirection = Vector3.RotateTowards(transform.forward, targetDirection, 360f, 1f);
+        targetRotation = Quaternion.LookRotation(rotationDirection);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.fixedDeltaTime * travelSpeed + ((travelSpeed * 0.1f) * travelVelocity));
+
+
+        if (!reachedVerticalTarget)
+        {
+            var vPos = new Vector3(0f, transform.position.y, 0f);
+            var vTargetPos = new Vector3(0f, Target.transform.position.y, 0f);
+            var verticalDistance = Vector3.Distance(vPos, vTargetPos);
+
+            if (verticalDistance < 1f)
+            {
+                reachedVerticalTarget = true;
+            }
+
+            var verticalDir = new Vector3(0f, targetDirection.y, 0f).normalized;
+            transform.position += verticalDir * (travelSpeed * 0.3f) * Time.fixedDeltaTime;
+        }
+
+        if (!reachedHorizontalTarget)
+        {
+            var hPos = new Vector3(transform.position.x, 0f, transform.position.z);
+            var hTargetPos = new Vector3(Target.transform.position.x, 0f, Target.transform.position.z);
+            var horizontalDistance = Vector3.Distance(hPos, hTargetPos);
+
+            if (horizontalDistance < 1f)
+            {
+                reachedHorizontalTarget = true;
+            }
+            UpdateTravelVelocity();
+            var horizontalDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
+            transform.position += horizontalDir * (travelSpeed * travelVelocity) * Time.fixedDeltaTime;
+        }
     }
 
     //TODO
