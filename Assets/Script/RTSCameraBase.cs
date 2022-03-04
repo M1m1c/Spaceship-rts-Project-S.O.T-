@@ -155,7 +155,7 @@ public class RTSCameraBase : MonoBehaviour
 
         if (CameraHolderRef)
         {
-            UpdatezoomVelocity();
+            UpdateZoomVelocity();
             var zoomChange = (zoomSpeed * zoomVelocity) * Time.deltaTime;
             currentZoom = Mathf.Clamp(Mathf.Abs(CameraHolderRef.localPosition.z) - zoomDirection * zoomChange, 1f, maxZoomOut);
             var zoomPos = new Vector3(CameraHolderRef.localPosition.x, CameraHolderRef.localPosition.y, -currentZoom);
@@ -165,7 +165,7 @@ public class RTSCameraBase : MonoBehaviour
 
     private void UpdateMoveVelocity()
     {
-        var velocityChangeHorizontal = GetVelocityChange(
+        var velocityChangeHorizontal = VelocityCalc.GetVelocityChange(
             moveVelocityHorizontal,
             moveDecelerationSpeed,
             moveAccelerationSpeed,
@@ -174,7 +174,7 @@ public class RTSCameraBase : MonoBehaviour
         moveVelocityHorizontal = Mathf.Clamp(moveVelocityHorizontal + velocityChangeHorizontal, 0f, 1f);
 
 
-        var velocityChangeVertical = GetVelocityChange(
+        var velocityChangeVertical = VelocityCalc.GetVelocityChange(
             moveVelocityVertical,
             moveDecelerationSpeed,
             moveAccelerationSpeed,
@@ -185,7 +185,7 @@ public class RTSCameraBase : MonoBehaviour
 
     private void UpdateRotVelocity()
     {
-        var velocityChange = GetVelocityChange(
+        var velocityChange = VelocityCalc.GetVelocityChange(
             rotVelocity,
             rotDecelerationSpeed,
             rotAccelerationSpeed,
@@ -194,24 +194,16 @@ public class RTSCameraBase : MonoBehaviour
         rotVelocity = Mathf.Clamp(rotVelocity + velocityChange, 0f, 1f);
     }
 
-    private void UpdatezoomVelocity()
+    private void UpdateZoomVelocity()
     {
-        var velocityChange = GetVelocityChange(
+        var velocityChange = VelocityCalc.GetVelocityChange(
             zoomVelocity,
             zoomDecelerationSpeed,
             zoomAccelerationSpeed,
             zoomAccOrDec);
 
         zoomVelocity = Mathf.Clamp(zoomVelocity + velocityChange, 0f, 1f);
-    }
-
-    private float GetVelocityChange(float velocity, float decelerationSpeed, float accelerationSpeed, bool changeCondition)
-    {
-        var proportionalDec = -(Time.deltaTime + (Time.deltaTime * (decelerationSpeed * velocity)));
-        var deceleration = velocity > 0f ? proportionalDec : -Time.deltaTime;
-        var velocityChange = (changeCondition ? Time.deltaTime * accelerationSpeed : deceleration);
-        return velocityChange;
-    }
+    } 
 
     private void OnDrawGizmos()
     {
