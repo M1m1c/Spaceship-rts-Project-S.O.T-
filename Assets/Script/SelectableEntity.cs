@@ -10,7 +10,15 @@ public class SelectableEntity : MonoBehaviour
     public Transform MyOrderBeacon
     {
         get { return myOrderBeacon; }
-        set { myOrderBeacon = value; }
+        set
+        {
+            myOrderBeacon = value;
+
+            if (movementComp)
+            {
+                movementComp.Target = myOrderBeacon;
+            }
+        }
     }
 
     public Material LineMaterial;
@@ -18,12 +26,14 @@ public class SelectableEntity : MonoBehaviour
     private Color startcol;
     private Renderer myRenderer;
 
+    private MovementComp movementComp;
+
     void Start()
     {
         myRenderer = gameObject.GetComponent<Renderer>();
         startcol = myRenderer.material.color;
+        movementComp = GetComponentInParent<MovementComp>();
     }
-
 
     public void OnSelected()
     {
