@@ -154,8 +154,8 @@ public class SelectionController : MonoBehaviour
             {
                 pair.Value.MyOrderBeacon = currentOrderBeacon;
             }
-            currentOrderBeacon = null;
-            ClearSelection();
+           
+            ResetOrderVariables();
         }
     }
 
@@ -168,15 +168,23 @@ public class SelectionController : MonoBehaviour
     private void ClearSelection()
     {
         selectionCollection.DeselectAllEntties();
-        beaconYLevel = 0f;
-        orderStage = 0;
-        currentGroupOrigin.MyOrderBeacon = null;
 
         if (currentOrderBeacon != null)
         {
             Destroy(currentOrderBeacon.gameObject);
         }
+
+        ResetOrderVariables();
     }
+
+    private void ResetOrderVariables()
+    {
+        beaconYLevel = 0f;
+        orderStage = 0;
+        currentOrderBeacon = null;
+        currentGroupOrigin.MyOrderBeacon = null;
+    }
+
     private void SetupAnOrder(int selectedCount)
     {
         orderStage = 1;
