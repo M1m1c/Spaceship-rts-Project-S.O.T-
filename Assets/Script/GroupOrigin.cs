@@ -16,6 +16,10 @@ public class GroupOrigin : MonoBehaviour
         }
     }
 
+
+    public Dictionary<int, SelectableEntity> SelectionGroup { get; set; }
+
+
     private LineRenderer lineRenderer;
 
     void Start()
@@ -27,9 +31,10 @@ public class GroupOrigin : MonoBehaviour
     }
 
     private void Update()
-    {
+    { 
         if (MyOrderBeacon)
         {
+            transform.position = GroupPlaneCalc.GetGroupPlane(SelectionGroup);
             var start = transform.position;
             var end = MyOrderBeacon.position;
             lineRenderer.SetPosition(0, start);

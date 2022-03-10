@@ -190,24 +190,13 @@ public class SelectionController : MonoBehaviour
         orderStage = 1;
         currentOrderBeacon = Instantiate(OrderBeaconPrefab);
 
-        var averageX = 0f;
-        var averageY = 0f;
-        var averageZ = 0f;
-        foreach (var pair in selectionCollection.SelectedEnteties)
-        {
-            var pos = pair.Value.transform.position;
-            averageX += pos.x;
-            averageY += pos.y;
-            averageZ += pos.z;
-        }
+        var selectionGroup = selectionCollection.SelectedEnteties;
+        var planePos = GroupPlaneCalc.GetGroupPlane(selectionGroup);
+        beaconYLevel = GroupPlaneCalc.GetAverageYPos(selectionGroup);
 
-        averageX = averageX / (float)selectedCount;
-        beaconYLevel = averageY / (float)selectedCount;
-        averageZ = averageZ / (float)selectedCount;
-
-        var planePos = new Vector3(averageX, beaconYLevel, averageZ);
         currentOrderBeacon.transform.position = planePos;
         currentGroupOrigin.transform.position = planePos;
+        currentGroupOrigin.SelectionGroup = selectionGroup;
         currentGroupOrigin.MyOrderBeacon = currentOrderBeacon;
 
         beaconGroundPlane = new Plane(Vector3.up, planePos);
