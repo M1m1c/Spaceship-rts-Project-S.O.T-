@@ -160,7 +160,7 @@ public class LightShipMovementComp : UnitMovement
             }
 
             var verticalDir = new Vector3(0f, targetDirection.y, 0f).normalized;
-            transform.position += verticalDir * (travelSpeed * 0.3f) * Time.fixedDeltaTime;
+            transform.position += verticalDir * (travelSpeed * (travelVelocity * travelModifier)) * Time.fixedDeltaTime;
         }
 
         if (!reachedHorizontalTarget)
