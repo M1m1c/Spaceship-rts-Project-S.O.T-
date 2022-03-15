@@ -21,7 +21,12 @@ public class LightShipMovementComp : UnitMovement
             targetDirection = Target.transform.position - transform.position;
             var rotationDirection = Vector3.RotateTowards(transform.forward, targetDirection, 360f, 1f);
             targetRotation = Quaternion.LookRotation(rotationDirection);
-            finalRotation = targetRotation;
+
+            var finalDirection =
+                new Vector3(Target.transform.position.x, 0f, Target.transform.position.z) -
+                new Vector3(transform.position.x, 0f, transform.position.z);
+
+            finalRotation = Quaternion.LookRotation(finalDirection);
         }
     }
     private Transform target;
