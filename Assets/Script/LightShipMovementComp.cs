@@ -85,10 +85,6 @@ public class LightShipMovementComp : UnitMovement
 
     private void UpdateRotationVelocity()
     {
-        //if angle is close to 0 then we can decelerate
-        //var angle = Vector3.Angle(transform.forward, targetDirection);
-        //var decelAngle = 1f;
-
         var velocityChange = VelocityCalc.GetVelocityChange(
             rotationVelocity,
             travelDecelerationSpeed,
@@ -111,6 +107,7 @@ public class LightShipMovementComp : UnitMovement
 
         if (distanceToTarget < 1f)
         {
+            //TODO fix when vertical move is longer that it does not rotate correctly at the end of movement
             targetRotation = finalRotation;
             //TODO when done rotationg to final rotation remove target
         }
