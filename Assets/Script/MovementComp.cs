@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+//DEPRECATED
 public class MovementComp : UnitMovement
 {
 
 
-    public Transform Target
+    public override Transform Target
     {
         get { return target; }
         set

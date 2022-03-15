@@ -26,13 +26,13 @@ public class SelectableEntity : MonoBehaviour
     private Color startcol;
     private Renderer myRenderer;
 
-    private MovementComp movementComp;
+    private UnitMovement movementComp;
 
     void Start()
     {
         myRenderer = gameObject.GetComponent<Renderer>();
         startcol = myRenderer.material.color;
-        movementComp = GetComponentInParent<MovementComp>();
+        movementComp = GetComponentInParent<UnitMovement>();
     }
 
     public void OnSelected()
