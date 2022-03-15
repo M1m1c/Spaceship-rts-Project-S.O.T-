@@ -44,8 +44,8 @@ public class LightShipMovementComp : UnitMovement
     private float rotationVelocity = 0f;
     private float travelModifier = 1f;
     private float rotationModifier = 1f;
-    private float distanceToTarget=2f;
-    private float angleToTarget=2f;
+    private float distanceToTarget = 2f;
+    private float angleToTarget = 2f;
     private bool reachedHorizontalTarget = false;
     private bool reachedVerticalTarget = false;
     private bool allowedToMoveH = true;
@@ -128,11 +128,8 @@ public class LightShipMovementComp : UnitMovement
             Time.fixedDeltaTime * travelSpeed + (rotSpeed * rotVel));
 
 
-        if (reachedVerticalTarget && reachedHorizontalTarget)
-        {
-            return;
-        }
-
+        if (reachedVerticalTarget && reachedHorizontalTarget) { return; }
+       
         if (distanceToTarget < 15f)
         {
             if (angleToTarget > travelAngle)
@@ -146,6 +143,7 @@ public class LightShipMovementComp : UnitMovement
                 travelModifier = 1f;
             }
         }
+        UpdateTravelVelocity();
 
         //TODO Rework vertical movement to be better
         if (!reachedVerticalTarget)
@@ -158,7 +156,6 @@ public class LightShipMovementComp : UnitMovement
             {
                 reachedVerticalTarget = true;
             }
-
             var verticalDir = new Vector3(0f, targetDirection.y, 0f).normalized;
             transform.position += verticalDir * (travelSpeed * (travelVelocity * travelModifier)) * Time.fixedDeltaTime;
         }
@@ -172,9 +169,7 @@ public class LightShipMovementComp : UnitMovement
             if (horizontalDistance < 1f)
             {
                 reachedHorizontalTarget = true;
-            }
-
-            UpdateTravelVelocity();
+            }         
             var horizontalDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
             transform.position += horizontalDir * (travelSpeed * (travelVelocity * travelModifier)) * Time.fixedDeltaTime;
         }
