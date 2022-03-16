@@ -9,7 +9,6 @@ public class SelectionController : MonoBehaviour
     public GameObject SelectBoxPrefab;
     public MeshCollider SelectionBoxPrefab;
     public Transform OrderBeaconPrefab;
-    //public GroupOrigin groupOriginPrefab;
 
     private RectTransform selectBox;
     private MeshCollider selectionBox;

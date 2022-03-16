@@ -164,16 +164,7 @@ public class RTSCameraBase : MonoBehaviour
         var sideMovement = transform.right * horizontalMoveDirection.x * currentHorizontalMoveSpeed;
         var horizontalMovement = forwardMovement + sideMovement;
         var verticalMovement = transform.up * verticalMoveDirection * currentVerticalMoveSpeed;
-        //TODO check if should detatch
-        if (transform.parent != null &&
-            (
-                (horizontalMovement.magnitude > 0f || verticalMovement.magnitude > 0f) ||
-                (selectionCollection != null && selectionCollection.SelectedEnteties.Count == 0)
-            )
-           )
-        {
-            transform.parent = null;
-        }
+        CheckStopFollowingGroup(ref horizontalMovement, ref verticalMovement);
         transform.Translate(horizontalMovement + verticalMovement, Space.World);
 
 
@@ -197,6 +188,19 @@ public class RTSCameraBase : MonoBehaviour
             currentZoom = Mathf.Clamp(Mathf.Abs(CameraHolderRef.localPosition.z) - zoomDirection * zoomChange, 1f, maxZoomOut);
             var zoomPos = new Vector3(CameraHolderRef.localPosition.x, CameraHolderRef.localPosition.y, -currentZoom);
             CameraHolderRef.localPosition = zoomPos;
+        }
+    }
+
+    private void CheckStopFollowingGroup(ref Vector3 horizontalMovement, ref Vector3 verticalMovement)
+    {
+        if (transform.parent != null &&
+            (
+                (horizontalMovement.magnitude > 0f || verticalMovement.magnitude > 0f) ||
+                (selectionCollection != null && selectionCollection.SelectedEnteties.Count == 0)
+            )
+           )
+        {
+            transform.parent = null;
         }
     }
 
