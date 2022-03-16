@@ -94,6 +94,15 @@
                     "processors": "",
                     "interactions": "Tap",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "FollowSelection",
+                    "type": "Button",
+                    "id": "193c9dee-3a39-457e-bb70-21d8ecd2e97f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -325,6 +334,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "MoveOrder",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bff6a8cc-8c56-42b8-be62-745831af75db",
+                    "path": "<Keyboard>/f",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FollowSelection",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

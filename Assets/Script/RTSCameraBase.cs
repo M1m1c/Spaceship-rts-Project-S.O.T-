@@ -5,11 +5,16 @@ using UnityEngine.InputSystem;
 
 public class RTSCameraBase : MonoBehaviour
 {
+
     private float defaultArmLength = 5f;
 
     private Transform CameraPivotRef;
     private Transform CameraHolderRef;
 
+
+    private SharedCameraVariables sharedCameraVariables;
+    private SelectionCollection selectionCollection;
+    private GroupOrigin currentGroupOrigin;
     //TODO make settings json or scriptable object used to set some fo these settings
 
     private Vector2 horizontalMoveDirection = new Vector2();
@@ -101,6 +106,22 @@ public class RTSCameraBase : MonoBehaviour
         }
     }
 
+    public void InputAttatchToGroup(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            if (transform.parent)
+            {
+                transform.parent = null;
+            }
+            else if (currentGroupOrigin &&
+                (selectionCollection != null && selectionCollection.SelectedEnteties.Count > 0))
+            {
+                transform.parent = currentGroupOrigin.transform;
+                transform.localPosition = Vector3.zero;
+            }
+        }
+    }
 
     private void OnValidate()
     {
@@ -111,10 +132,16 @@ public class RTSCameraBase : MonoBehaviour
     {
         Setup();
         //Cursor.lockState = CursorLockMode.Confined;
+        sharedCameraVariables = GetComponent<SharedCameraVariables>();
+        selectionCollection = sharedCameraVariables.selectionCollection;
+        currentGroupOrigin = sharedCameraVariables.currentGroupOrigin;
+
     }
 
     protected virtual void Setup()
     {
+
+
         if (!CameraPivotRef)
         {
             CameraPivotRef = transform.GetChild(0);
@@ -132,11 +159,21 @@ public class RTSCameraBase : MonoBehaviour
     {
         UpdateMoveVelocity();
         var currentHorizontalMoveSpeed = (minMoveSpeed * moveVelocityHorizontal) * Mathf.Sqrt(currentZoom) * Time.deltaTime;
-        var currentVerticalMoveSpeed = (minMoveSpeed*moveVelocityVertical) * Mathf.Sqrt(currentZoom) * Time.deltaTime;
+        var currentVerticalMoveSpeed = (minMoveSpeed * moveVelocityVertical) * Mathf.Sqrt(currentZoom) * Time.deltaTime;
         var forwardMovement = transform.forward * horizontalMoveDirection.y * currentHorizontalMoveSpeed;
         var sideMovement = transform.right * horizontalMoveDirection.x * currentHorizontalMoveSpeed;
         var horizontalMovement = forwardMovement + sideMovement;
         var verticalMovement = transform.up * verticalMoveDirection * currentVerticalMoveSpeed;
+        //TODO check if should detatch
+        if (transform.parent != null &&
+            (
+                (horizontalMovement.magnitude > 0f || verticalMovement.magnitude > 0f) ||
+                (selectionCollection != null && selectionCollection.SelectedEnteties.Count == 0)
+            )
+           )
+        {
+            transform.parent = null;
+        }
         transform.Translate(horizontalMovement + verticalMovement, Space.World);
 
 
@@ -203,7 +240,7 @@ public class RTSCameraBase : MonoBehaviour
             zoomAccOrDec);
 
         zoomVelocity = Mathf.Clamp(zoomVelocity + velocityChange, 0f, 1f);
-    } 
+    }
 
     private void OnDrawGizmos()
     {

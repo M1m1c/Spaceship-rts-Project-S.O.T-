@@ -9,13 +9,13 @@ public class SelectionController : MonoBehaviour
     public GameObject SelectBoxPrefab;
     public MeshCollider SelectionBoxPrefab;
     public Transform OrderBeaconPrefab;
-    public GroupOrigin groupOriginPrefab;
+    //public GroupOrigin groupOriginPrefab;
 
     private RectTransform selectBox;
     private MeshCollider selectionBox;
 
+    private SharedCameraVariables sharedCameraVariables;
     private SelectionCollection selectionCollection;
-
 
     private Vector3 squareStartPos;
     private Vector3 squareEndPos;
@@ -143,7 +143,7 @@ public class SelectionController : MonoBehaviour
         if (selectedCount == 0) { return; }
 
         if (orderStage == 0)
-        {      
+        {
             SetupAnOrder(selectedCount);
         }
         else if (orderStage == 1)
@@ -154,7 +154,7 @@ public class SelectionController : MonoBehaviour
             {
                 pair.Value.MyOrderBeacon = currentOrderBeacon;
             }
-           
+
             ResetOrderVariables();
         }
     }
@@ -206,6 +206,7 @@ public class SelectionController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.05f);
         selectionBox.enabled = false;
+        currentGroupOrigin.SelectionGroup = selectionCollection.SelectedEnteties;
     }
 
     private Mesh GenerateSelectionBoxMesh()
@@ -239,7 +240,9 @@ public class SelectionController : MonoBehaviour
 
     private void Start()
     {
-        selectionCollection = GetComponent<SelectionCollection>();
+        sharedCameraVariables = GetComponent<SharedCameraVariables>();
+        selectionCollection=sharedCameraVariables.selectionCollection;
+        currentGroupOrigin = sharedCameraVariables.currentGroupOrigin;
 
         if (SelectionBoxPrefab)
         {
@@ -264,7 +267,6 @@ public class SelectionController : MonoBehaviour
             selectBox.gameObject.SetActive(false);
         }
 
-        if (groupOriginPrefab) { currentGroupOrigin = Instantiate(groupOriginPrefab); }
 
     }
     private void Update()
