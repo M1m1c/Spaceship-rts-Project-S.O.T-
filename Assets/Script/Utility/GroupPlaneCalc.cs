@@ -6,6 +6,7 @@ public static class GroupPlaneCalc
 {
    public static Vector3 GetGroupPlane(Dictionary<int,SelectableEntity> selectionGroup)
     {
+        if (selectionGroup == null || selectionGroup.Count == 0) { return Vector3.zero; }
         var averageX = 0f;
         var averageY = 0f;
         var averageZ = 0f;
