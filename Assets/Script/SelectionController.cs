@@ -240,7 +240,7 @@ public class SelectionController : MonoBehaviour
     private void Start()
     {
         sharedCameraVariables = GetComponent<SharedCameraVariables>();
-        selectionCollection=sharedCameraVariables.selectionCollection;
+        selectionCollection = sharedCameraVariables.selectionCollection;
         currentGroupOrigin = sharedCameraVariables.currentGroupOrigin;
 
         if (SelectionBoxPrefab)
@@ -304,6 +304,12 @@ public class SelectionController : MonoBehaviour
                 {
                     var point = ray.GetPoint(distance);
                     currentOrderBeacon.position = new Vector3(point.x, currentOrderBeacon.position.y, point.z);
+
+                    var beacon2DPos = new Vector3(currentOrderBeacon.position.x, 0f, currentOrderBeacon.position.z);
+                    var group2DPos = new Vector3(currentGroupOrigin.transform.position.x, 0f, currentGroupOrigin.transform.position.z);
+                    var finalDirection = beacon2DPos - group2DPos;
+
+                    currentOrderBeacon.rotation = Quaternion.LookRotation(finalDirection);
                 }
             }
             else
