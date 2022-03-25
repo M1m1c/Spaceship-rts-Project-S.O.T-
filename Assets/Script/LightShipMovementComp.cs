@@ -61,11 +61,6 @@ public class LightShipMovementComp : UnitMovement
     private float vertSpeedMod = 1f;
     private float horiSpeedMod = 1f;
 
-    //TODO these should probably be related to how fast we are moving ie how many units per frame,
-    //so that even at faster travel speeds we are still able to hit the target and not overshoot it
-    private const float HDistThreshold = 0.3f;
-    private const float VDistThreshold = 1f;
-
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -168,25 +163,27 @@ public class LightShipMovementComp : UnitMovement
         { horiSpeedMod = horizontalDistance / verticalDistance; }
 
         if (!reachedVerticalTarget)
-        {
-            if (verticalDistance < VDistThreshold)
-            {
-                reachedVerticalTarget = true;
-            }
+        {         
             var verticalDir = new Vector3(0f, targetDirection.y, 0f).normalized;
             var vertSpeed = (travelSpeed * (travelVelocity * travelModifier) * vertSpeedMod) * Time.fixedDeltaTime;
             transform.position += verticalDir * vertSpeed;
+
+            if (verticalDistance < vertSpeed+0.1f)
+            {
+                reachedVerticalTarget = true;
+            }
         }
 
         if (!reachedHorizontalTarget)
-        {
-            if (horizontalDistance < HDistThreshold)
-            {
-                reachedHorizontalTarget = true;
-            }
+        {           
             var horizontalDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
             var horiSpeed = (travelSpeed * (travelVelocity * travelModifier) * horiSpeedMod) * Time.fixedDeltaTime;
             transform.position += horizontalDir * horiSpeed;
+
+            if (horizontalDistance < horiSpeed+0.1f)
+            {
+                reachedHorizontalTarget = true;
+            }
         }
 
         if (reachedVerticalTarget && reachedHorizontalTarget) { transform.position = target.position; }
