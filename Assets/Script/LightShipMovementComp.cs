@@ -22,9 +22,8 @@ public class LightShipMovementComp : UnitMovement
             var rotationDirection = Vector3.RotateTowards(transform.forward, targetDirection, 360f, 1f);
             targetRotation = Quaternion.LookRotation(rotationDirection);
 
-            //var finalDirection =
-            //    new Vector3(Target.transform.position.x, 0f, Target.transform.position.z) -
-            //    new Vector3(transform.position.x, 0f, transform.position.z);
+            rotationModifier = 1f;
+            travelModifier = 1f;
 
             finalRotation = Quaternion.LookRotation(Target.transform.forward);
         }
@@ -56,6 +55,9 @@ public class LightShipMovementComp : UnitMovement
     private float travelSpeed = 50f;
     private float travelDecelerationSpeed = 0.99f;
     private float travelAccelerationSpeed = 1f;
+
+    private const float HDistThreshold = 0.3f;
+    private const float VDistThreshold = 1f;
 
     void Start()
     {
@@ -149,7 +151,7 @@ public class LightShipMovementComp : UnitMovement
             var vTargetPos = new Vector3(0f, Target.transform.position.y, 0f);
             var verticalDistance = Vector3.Distance(vPos, vTargetPos);
 
-            if (verticalDistance < 1f)
+            if (verticalDistance < VDistThreshold)
             {
                 reachedVerticalTarget = true;
             }
@@ -163,12 +165,14 @@ public class LightShipMovementComp : UnitMovement
             var hTargetPos = new Vector3(Target.transform.position.x, 0f, Target.transform.position.z);
             var horizontalDistance = Vector3.Distance(hPos, hTargetPos);
 
-            if (horizontalDistance < 1f)
+            if (horizontalDistance < HDistThreshold)
             {
                 reachedHorizontalTarget = true;
             }         
             var horizontalDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
             transform.position += horizontalDir * (travelSpeed * (travelVelocity * travelModifier)) * Time.fixedDeltaTime;
         }
+
+        if(reachedVerticalTarget && reachedHorizontalTarget) { transform.position = target.position; }
     }
 }
