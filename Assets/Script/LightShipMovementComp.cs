@@ -24,6 +24,8 @@ public class LightShipMovementComp : UnitMovement
 
             rotationModifier = 1f;
             travelModifier = 1f;
+            vertSpeedMod = 1f;
+            horiSpeedMod = 1f;
 
             finalRotation = Quaternion.LookRotation(Target.transform.forward);
         }
@@ -56,6 +58,11 @@ public class LightShipMovementComp : UnitMovement
     private float travelDecelerationSpeed = 0.99f;
     private float travelAccelerationSpeed = 1f;
 
+    private float vertSpeedMod = 1f;
+    private float horiSpeedMod = 1f;
+
+    //TODO these should probably be related to how fast we are moving ie how many units per frame,
+    //so that even at faster travel speeds we are still able to hit the target and not overshoot it
     private const float HDistThreshold = 0.3f;
     private const float VDistThreshold = 1f;
 
@@ -128,7 +135,9 @@ public class LightShipMovementComp : UnitMovement
 
 
         if (reachedVerticalTarget && reachedHorizontalTarget) { return; }
-       
+
+        //TODO might want to gradually transition between these modfier values,
+        //because now it can be a bit snappy 
         if (distanceToTarget < 15f)
         {
             if (angleToTarget > travelAngle)
@@ -142,37 +151,44 @@ public class LightShipMovementComp : UnitMovement
                 travelModifier = 1f;
             }
         }
+
         UpdateTravelVelocity();
 
-        //TODO Rework vertical movement to be better
+        var vPos = new Vector3(0f, transform.position.y, 0f);
+        var vTargetPos = new Vector3(0f, Target.transform.position.y, 0f);
+        var verticalDistance = Vector3.Distance(vPos, vTargetPos);
+
+        var hPos = new Vector3(transform.position.x, 0f, transform.position.z);
+        var hTargetPos = new Vector3(Target.transform.position.x, 0f, Target.transform.position.z);
+        var horizontalDistance = Vector3.Distance(hPos, hTargetPos);
+
+        if (horizontalDistance > verticalDistance)
+        { vertSpeedMod = verticalDistance / horizontalDistance; }
+        else
+        { horiSpeedMod = horizontalDistance / verticalDistance; }
+
         if (!reachedVerticalTarget)
         {
-            var vPos = new Vector3(0f, transform.position.y, 0f);
-            var vTargetPos = new Vector3(0f, Target.transform.position.y, 0f);
-            var verticalDistance = Vector3.Distance(vPos, vTargetPos);
-
             if (verticalDistance < VDistThreshold)
             {
                 reachedVerticalTarget = true;
             }
             var verticalDir = new Vector3(0f, targetDirection.y, 0f).normalized;
-            transform.position += verticalDir * (travelSpeed * (travelVelocity * travelModifier)) * Time.fixedDeltaTime;
+            var vertSpeed = (travelSpeed * (travelVelocity * travelModifier) * vertSpeedMod) * Time.fixedDeltaTime;
+            transform.position += verticalDir * vertSpeed;
         }
 
         if (!reachedHorizontalTarget)
         {
-            var hPos = new Vector3(transform.position.x, 0f, transform.position.z);
-            var hTargetPos = new Vector3(Target.transform.position.x, 0f, Target.transform.position.z);
-            var horizontalDistance = Vector3.Distance(hPos, hTargetPos);
-
             if (horizontalDistance < HDistThreshold)
             {
                 reachedHorizontalTarget = true;
-            }         
+            }
             var horizontalDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
-            transform.position += horizontalDir * (travelSpeed * (travelVelocity * travelModifier)) * Time.fixedDeltaTime;
+            var horiSpeed = (travelSpeed * (travelVelocity * travelModifier) * horiSpeedMod) * Time.fixedDeltaTime;
+            transform.position += horizontalDir * horiSpeed;
         }
 
-        if(reachedVerticalTarget && reachedHorizontalTarget) { transform.position = target.position; }
+        if (reachedVerticalTarget && reachedHorizontalTarget) { transform.position = target.position; }
     }
 }
