@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GroupOrigin : MonoBehaviour
+public class SelectionGroupOrigin : MonoBehaviour
 {
     private Transform myOrderBeacon;
 

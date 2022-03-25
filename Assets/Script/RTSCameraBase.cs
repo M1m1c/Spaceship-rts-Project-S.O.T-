@@ -14,7 +14,7 @@ public class RTSCameraBase : MonoBehaviour
 
     private SharedCameraVariables sharedCameraVariables;
     private SelectionCollection selectionCollection;
-    private GroupOrigin currentGroupOrigin;
+    private SelectionGroupOrigin currentGroupOrigin;
     //TODO make settings json or scriptable object used to set some fo these settings
 
     private Vector2 horizontalMoveDirection = new Vector2();

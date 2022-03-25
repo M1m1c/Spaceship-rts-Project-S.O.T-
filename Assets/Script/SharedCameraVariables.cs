@@ -5,9 +5,9 @@ using UnityEngine;
 public class SharedCameraVariables : MonoBehaviour
 {
     public SelectionCollection selectionCollection { get; private set; }
-    public GroupOrigin currentGroupOrigin { get; private set; }
+    public SelectionGroupOrigin currentGroupOrigin { get; private set; }
 
-    public GroupOrigin groupOriginPrefab;
+    public SelectionGroupOrigin groupOriginPrefab;
 
     void Start()
     {

@@ -32,7 +32,7 @@ public class SelectionController : MonoBehaviour
 
     private int orderStage = 0;
 
-    private GroupOrigin currentGroupOrigin;
+    private SelectionGroupOrigin currentGroupOrigin;
     private Transform currentOrderBeacon;
     private Plane beaconGroundPlane;
     private float beaconYDirection = 0f;
