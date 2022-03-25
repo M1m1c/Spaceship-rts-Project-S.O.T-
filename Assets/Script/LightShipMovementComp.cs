@@ -61,6 +61,8 @@ public class LightShipMovementComp : UnitMovement
     private float vertSpeedMod = 1f;
     private float horiSpeedMod = 1f;
 
+    private const float reachTargetAdditive = 0.3f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -163,24 +165,24 @@ public class LightShipMovementComp : UnitMovement
         { horiSpeedMod = horizontalDistance / verticalDistance; }
 
         if (!reachedVerticalTarget)
-        {         
+        {
             var verticalDir = new Vector3(0f, targetDirection.y, 0f).normalized;
             var vertSpeed = (travelSpeed * (travelVelocity * travelModifier) * vertSpeedMod) * Time.fixedDeltaTime;
             transform.position += verticalDir * vertSpeed;
 
-            if (verticalDistance < vertSpeed+0.1f)
+            if (verticalDistance < vertSpeed + reachTargetAdditive)
             {
                 reachedVerticalTarget = true;
             }
         }
 
         if (!reachedHorizontalTarget)
-        {           
+        {
             var horizontalDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
             var horiSpeed = (travelSpeed * (travelVelocity * travelModifier) * horiSpeedMod) * Time.fixedDeltaTime;
             transform.position += horizontalDir * horiSpeed;
-
-            if (horizontalDistance < horiSpeed+0.1f)
+            
+            if (horizontalDistance < horiSpeed + reachTargetAdditive)
             {
                 reachedHorizontalTarget = true;
             }
