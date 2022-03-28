@@ -2,10 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class SelectionController : MonoBehaviour
 {
+    public SelectionGroupOrigin CurrentGroupOrigin { get; private set; }
 
+    public GameObject UICanvas;
     public GameObject SelectBoxPrefab;
     public MeshCollider SelectionBoxPrefab;
     public Transform OrderBeaconPrefab;
@@ -15,6 +19,10 @@ public class SelectionController : MonoBehaviour
 
     private SharedCameraVariables sharedCameraVariables;
     private SelectionCollection selectionCollection;
+
+    private GraphicRaycaster uiRaycaster;
+    private PointerEventData uiEventData;
+    private List<RaycastResult> uiHitResults;
 
     private Vector3 squareStartPos;
     private Vector3 squareEndPos;
@@ -31,8 +39,7 @@ public class SelectionController : MonoBehaviour
 
 
     private int orderStage = 0;
-
-    private SelectionGroupOrigin currentGroupOrigin;
+ 
     private Transform currentOrderBeacon;
     private Plane beaconGroundPlane;
     private float beaconYDirection = 0f;
@@ -40,10 +47,27 @@ public class SelectionController : MonoBehaviour
     private float beaconYSpeed = 7f;
     private Vector2 savedCursorPosition;
 
+    private bool isUIClick = false;
     public void InputSelectStart(InputAction.CallbackContext context)
     {
+        if (!context.performed) { return; }
+        
         var mPos = Mouse.current.position.ReadValue();
         squareStartPos = new Vector3(mPos.x, mPos.y, 0f);
+
+        isUIClick = false;
+        uiEventData.position = mPos;
+        uiHitResults.Clear();
+        uiRaycaster.Raycast(uiEventData, uiHitResults);
+
+        if (uiHitResults.Count > 0)
+        {
+            UIButton uiButton= uiHitResults[0].gameObject.GetComponent<UIButton>();
+            if(uiButton == null) { return; }
+            isUIClick = true;
+            uiButton.OnClick(this);
+        }
+
     }
 
     public void InputSelectMultiple(InputAction.CallbackContext context)
@@ -65,10 +89,11 @@ public class SelectionController : MonoBehaviour
     {
         if (!context.performed) { return; }
 
-        if (!selectModifier)
+        if (!isUIClick && !selectModifier)
         {
             ClearSelection();
         }
+       
 
         var selectionSize = selectBox.sizeDelta.magnitude;
         var notLargeEnough = selectionSize < minMultiSelectionSize;
@@ -148,6 +173,7 @@ public class SelectionController : MonoBehaviour
         else if (orderStage == 1)
         {
             //FinishAnOrder()
+            //TODO if units are do not share a formation then create individual order beacons that do not overlap
             //TODO order all selected units to move to this beacon
             foreach (var pair in selectionCollection.SelectedEnteties)
             {
@@ -181,7 +207,7 @@ public class SelectionController : MonoBehaviour
         beaconYLevel = 0f;
         orderStage = 0;
         currentOrderBeacon = null;
-        currentGroupOrigin.MyOrderBeacon = null;
+        CurrentGroupOrigin.MyOrderBeacon = null;
     }
 
     private void SetupAnOrder(int selectedCount)
@@ -194,9 +220,9 @@ public class SelectionController : MonoBehaviour
         beaconYLevel = GroupPlaneCalc.GetAverageYPos(selectionGroup);
 
         currentOrderBeacon.transform.position = planePos;
-        currentGroupOrigin.transform.position = planePos;
-        currentGroupOrigin.SelectionGroup = selectionGroup;
-        currentGroupOrigin.MyOrderBeacon = currentOrderBeacon;
+        CurrentGroupOrigin.transform.position = planePos;
+        CurrentGroupOrigin.SelectionGroup = selectionGroup;
+        CurrentGroupOrigin.MyOrderBeacon = currentOrderBeacon;
 
         beaconGroundPlane = new Plane(Vector3.up, planePos);
     }
@@ -205,7 +231,7 @@ public class SelectionController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.05f);
         selectionBox.enabled = false;
-        currentGroupOrigin.SelectionGroup = selectionCollection.SelectedEnteties;
+        CurrentGroupOrigin.SelectionGroup = selectionCollection.SelectedEnteties;
     }
 
     private Mesh GenerateSelectionBoxMesh()
@@ -241,7 +267,14 @@ public class SelectionController : MonoBehaviour
     {
         sharedCameraVariables = GetComponent<SharedCameraVariables>();
         selectionCollection = sharedCameraVariables.selectionCollection;
-        currentGroupOrigin = sharedCameraVariables.currentGroupOrigin;
+        CurrentGroupOrigin = sharedCameraVariables.currentGroupOrigin;
+
+        if (UICanvas)
+        {
+            uiRaycaster = UICanvas.GetComponent<GraphicRaycaster>();
+        }
+        uiEventData = new PointerEventData(EventSystem.current);
+        uiHitResults = new List<RaycastResult>();
 
         if (SelectionBoxPrefab)
         {
@@ -306,7 +339,7 @@ public class SelectionController : MonoBehaviour
                     currentOrderBeacon.position = new Vector3(point.x, currentOrderBeacon.position.y, point.z);
 
                     var beacon2DPos = new Vector3(currentOrderBeacon.position.x, 0f, currentOrderBeacon.position.z);
-                    var group2DPos = new Vector3(currentGroupOrigin.transform.position.x, 0f, currentGroupOrigin.transform.position.z);
+                    var group2DPos = new Vector3(CurrentGroupOrigin.transform.position.x, 0f, CurrentGroupOrigin.transform.position.z);
                     var finalDirection = beacon2DPos - group2DPos;
 
                     currentOrderBeacon.rotation = Quaternion.LookRotation(finalDirection);
