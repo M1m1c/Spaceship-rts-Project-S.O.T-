@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f56fd4b76848a5d4e9d571d0d8257955, type: 3}
+  m_Name: LineFormation
+  m_EditorClassIdentifier: 
+  IsFirstIndexCenter: 1
+  MaxUnits: 0
+  XOffset: 5
+  YOffset: 0
+  ZOffset: 0
