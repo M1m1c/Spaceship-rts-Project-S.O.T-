@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Assertions;
 
 public class RTSCameraBase : MonoBehaviour
 {
@@ -141,18 +142,13 @@ public class RTSCameraBase : MonoBehaviour
     protected virtual void Setup()
     {
 
+        CameraPivotRef = transform.GetChild(0);
+        Assert.IsNotNull(CameraPivotRef);
 
-        if (!CameraPivotRef)
-        {
-            CameraPivotRef = transform.GetChild(0);
-        }
-
-        if (!CameraHolderRef)
-        {
-            CameraHolderRef = transform.GetChild(0).GetChild(0);
-            CameraHolderRef.transform.localPosition = new Vector3(0f, 0f, -defaultArmLength);
-            currentZoom = defaultArmLength;
-        }
+        CameraHolderRef = transform.GetChild(0).GetChild(0);
+        CameraHolderRef.transform.localPosition = new Vector3(0f, 0f, -defaultArmLength);
+        currentZoom = defaultArmLength;
+        Assert.IsNotNull(CameraHolderRef);
     }
 
     private void Update()

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.Assertions;
 
 public class SelectionController : MonoBehaviour
 {
@@ -39,7 +40,7 @@ public class SelectionController : MonoBehaviour
 
 
     private int orderStage = 0;
- 
+
     private Transform currentOrderBeacon;
     private Plane beaconGroundPlane;
     private float beaconYDirection = 0f;
@@ -51,7 +52,7 @@ public class SelectionController : MonoBehaviour
     public void InputSelectStart(InputAction.CallbackContext context)
     {
         if (!context.performed) { return; }
-        
+
         var mPos = Mouse.current.position.ReadValue();
         squareStartPos = new Vector3(mPos.x, mPos.y, 0f);
 
@@ -62,8 +63,8 @@ public class SelectionController : MonoBehaviour
 
         if (uiHitResults.Count > 0)
         {
-            UIButton uiButton= uiHitResults[0].gameObject.GetComponent<UIButton>();
-            if(uiButton == null) { return; }
+            UIButton uiButton = uiHitResults[0].gameObject.GetComponent<UIButton>();
+            if (uiButton == null) { return; }
             isUIClick = true;
             uiButton.OnClick(this);
         }
@@ -93,7 +94,7 @@ public class SelectionController : MonoBehaviour
         {
             ClearSelection();
         }
-       
+
 
         var selectionSize = selectBox.sizeDelta.magnitude;
         var notLargeEnough = selectionSize < minMultiSelectionSize;
@@ -269,21 +270,23 @@ public class SelectionController : MonoBehaviour
         selectionCollection = sharedCameraVariables.selectionCollection;
         CurrentGroupOrigin = sharedCameraVariables.currentGroupOrigin;
 
-        if (UICanvas)
-        {
-            uiRaycaster = UICanvas.GetComponent<GraphicRaycaster>();
-        }
+        //TODO specifically choose what cnavas to spawn
+        var canvas = FindObjectOfType<Canvas>();
+        if (!canvas) { canvas = Instantiate(new Canvas()); }
+        UICanvas = canvas.gameObject;
+
+        Assert.IsNotNull(UICanvas);
+        uiRaycaster = UICanvas.GetComponent<GraphicRaycaster>();
         uiEventData = new PointerEventData(EventSystem.current);
         uiHitResults = new List<RaycastResult>();
 
-        if (SelectionBoxPrefab)
-        {
-            selectionBox = Instantiate(SelectionBoxPrefab, Vector3.zero, Quaternion.identity);
-            selectionBox.convex = true;
-            selectionBox.isTrigger = true;
-            var script = selectionBox.GetComponent<SelectionBox3D>();
-            script.SelectionChanged.AddListener(selectionCollection.AddSelectedEntity);
-        }
+        Assert.IsNotNull(SelectionBoxPrefab);
+        selectionBox = Instantiate(SelectionBoxPrefab, Vector3.zero, Quaternion.identity);
+        selectionBox.convex = true;
+        selectionBox.isTrigger = true;
+        var script = selectionBox.GetComponent<SelectionBox3D>();
+        script.SelectionChanged.AddListener(selectionCollection.AddSelectedEntity);
+
 
 
         if (selectBox)
@@ -291,14 +294,11 @@ public class SelectionController : MonoBehaviour
             selectBox.gameObject.SetActive(false);
         }
         else if (SelectBoxPrefab)
-        {
-            var canvas = FindObjectOfType<Canvas>();
-
-            if (!canvas) { canvas = Instantiate(new Canvas()); }
+        {         
             selectBox = Instantiate(SelectBoxPrefab, canvas.transform, false).GetComponent<RectTransform>();
             selectBox.gameObject.SetActive(false);
         }
-
+        Assert.IsNotNull(selectionBox);
 
     }
     private void Update()
