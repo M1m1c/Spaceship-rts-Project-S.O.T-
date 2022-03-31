@@ -178,7 +178,9 @@ public class SelectionController : MonoBehaviour
             //TODO order all selected units to move to this beacon
             foreach (var pair in selectionCollection.SelectedEnteties)
             {
-                pair.Value.MyOrderBeacon = currentOrderBeacon;
+                var root = pair.Value.OrderableRoot;
+                if (root == null) { continue; }
+                root.TargetOrderBeacon = currentOrderBeacon;
             }
 
             ResetOrderVariables();
@@ -208,7 +210,7 @@ public class SelectionController : MonoBehaviour
         beaconYLevel = 0f;
         orderStage = 0;
         currentOrderBeacon = null;
-        CurrentGroupOrigin.MyOrderBeacon = null;
+        CurrentGroupOrigin.TargetOrderBeacon = null;
     }
 
     private void SetupAnOrder(int selectedCount)
@@ -223,7 +225,7 @@ public class SelectionController : MonoBehaviour
         currentOrderBeacon.transform.position = planePos;
         CurrentGroupOrigin.transform.position = planePos;
         CurrentGroupOrigin.SelectionGroup = selectionGroup;
-        CurrentGroupOrigin.MyOrderBeacon = currentOrderBeacon;
+        CurrentGroupOrigin.TargetOrderBeacon = currentOrderBeacon;
 
         beaconGroundPlane = new Plane(Vector3.up, planePos);
     }
