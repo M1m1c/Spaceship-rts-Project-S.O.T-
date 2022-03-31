@@ -46,15 +46,15 @@ public class FormationGroup : MonoBehaviour
         foreach (var unit in units.Values)
         {
             //var unitRoot = unit.transform.parent;
-            var unitMovement = unit.GetComponentInParent<UnitMovement>();
-            if(unitMovement == null) { continue; }
+            var unitRoot = unit.OrderableRoot;
+            if(unitRoot == null) { continue; }
 
             if (isFirstCase)
             {
                 isFirstCase = false;
                 // set it to move to objects position
                 var commandBeacon = Instantiate(orderBeaconPrefab, currentPos, Quaternion.identity);
-                unitMovement.Target = commandBeacon;
+                unitRoot.TargetOrderBeacon = commandBeacon;
                 //unitRoot = transform;
                 continue;
             }
@@ -82,7 +82,7 @@ public class FormationGroup : MonoBehaviour
             }
             //set target to be placement, spawn order beacon at pos to move unit there
             var beacon = Instantiate(orderBeaconPrefab, placement, Quaternion.identity);
-            unitMovement.Target = beacon;
+            unitRoot.TargetOrderBeacon = beacon;
             //unitRoot.transform.parent = transform;
             loopCount++;
 
