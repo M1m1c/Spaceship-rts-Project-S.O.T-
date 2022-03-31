@@ -2,11 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SelectionGroupOrigin : MonoBehaviour
+public class SelectionGroupOrigin : MonoBehaviour, IOrderable
 {
     private Transform myOrderBeacon;
-
-    public Transform MyOrderBeacon
+    public Transform TargetOrderBeacon
     {
         get { return myOrderBeacon; }
         set
@@ -18,7 +17,6 @@ public class SelectionGroupOrigin : MonoBehaviour
 
 
     public Dictionary<int, SelectableEntity> SelectionGroup { get; set; }
-
 
     private LineRenderer lineRenderer;
 
@@ -33,10 +31,10 @@ public class SelectionGroupOrigin : MonoBehaviour
     private void Update()
     {
         transform.position = GroupPlaneCalc.GetGroupPlane(SelectionGroup);
-        if (MyOrderBeacon)
+        if (TargetOrderBeacon)
         {
             var start = transform.position;
-            var end = MyOrderBeacon.position;
+            var end = TargetOrderBeacon.position;
             lineRenderer.SetPosition(0, start);
             lineRenderer.SetPosition(1, end);
             lineRenderer.SetPosition(2, new Vector3(end.x, transform.position.y, end.z));
