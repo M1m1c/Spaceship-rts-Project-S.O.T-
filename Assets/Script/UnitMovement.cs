@@ -4,7 +4,7 @@ using UnityEngine;
 
 public abstract class UnitMovement : MonoBehaviour
 {
-    public abstract Transform Target { get; set; }
+    public abstract Transform TargetBeacon { get; set; }
     protected abstract void MoveUnitToTarget();
     //protected abstract void UpdateTravelVelocity()
 }

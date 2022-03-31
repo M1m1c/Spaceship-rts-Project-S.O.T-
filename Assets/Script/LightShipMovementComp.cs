@@ -5,7 +5,7 @@ using UnityEngine;
 public class LightShipMovementComp : UnitMovement
 {
 
-    public override Transform Target
+    public override Transform TargetBeacon
     {
         get { return target; }
         set
@@ -17,8 +17,8 @@ public class LightShipMovementComp : UnitMovement
             }
             reachedHorizontalTarget = false;
             reachedVerticalTarget = false;
-            targetDistance = Vector3.Distance(transform.position, Target.transform.position);
-            targetDirection = Target.transform.position - transform.position;
+            targetDistance = Vector3.Distance(transform.position, TargetBeacon.transform.position);
+            targetDirection = TargetBeacon.transform.position - transform.position;
             var rotationDirection = Vector3.RotateTowards(transform.forward, targetDirection, 360f, 1f);
             targetRotation = Quaternion.LookRotation(rotationDirection);
 
@@ -27,7 +27,7 @@ public class LightShipMovementComp : UnitMovement
             vertSpeedMod = 1f;
             horiSpeedMod = 1f;
 
-            finalRotation = Quaternion.LookRotation(Target.transform.forward);
+            finalRotation = Quaternion.LookRotation(TargetBeacon.transform.forward);
         }
     }
     private Transform target;
@@ -76,7 +76,7 @@ public class LightShipMovementComp : UnitMovement
 
     private void UpdateTravelVelocity()
     {
-        var currentDist = Vector3.Distance(transform.position, Target.transform.position);
+        var currentDist = Vector3.Distance(transform.position, TargetBeacon.transform.position);
         var decelDist = targetDistance * 0.2f;
 
         var velocityChange = VelocityCalc.GetVelocityChangeBasedOnDistFixed(
@@ -103,13 +103,13 @@ public class LightShipMovementComp : UnitMovement
     protected override void MoveUnitToTarget()
     {
         if (rb == null) { return; }
-        if (Target == null) { return; }
+        if (TargetBeacon == null) { return; }
 
-        distanceToTarget = Vector3.Distance(transform.position, Target.transform.position);
+        distanceToTarget = Vector3.Distance(transform.position, TargetBeacon.transform.position);
         angleToTarget = Vector3.Angle(transform.forward, targetDirection);
 
         UpdateRotationVelocity();
-        targetDirection = Target.transform.position - transform.position;
+        targetDirection = TargetBeacon.transform.position - transform.position;
 
         if (distanceToTarget < 1f)
         {
@@ -157,11 +157,11 @@ public class LightShipMovementComp : UnitMovement
         UpdateTravelVelocity();
 
         var vPos = new Vector3(0f, transform.position.y, 0f);
-        var vTargetPos = new Vector3(0f, Target.transform.position.y, 0f);
+        var vTargetPos = new Vector3(0f, TargetBeacon.transform.position.y, 0f);
         var verticalDistance = Vector3.Distance(vPos, vTargetPos);
 
         var hPos = new Vector3(transform.position.x, 0f, transform.position.z);
-        var hTargetPos = new Vector3(Target.transform.position.x, 0f, Target.transform.position.z);
+        var hTargetPos = new Vector3(TargetBeacon.transform.position.x, 0f, TargetBeacon.transform.position.z);
         var horizontalDistance = Vector3.Distance(hPos, hTargetPos);
 
         if (horizontalDistance > verticalDistance)

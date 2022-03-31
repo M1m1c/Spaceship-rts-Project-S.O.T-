@@ -8,7 +8,7 @@ public class MovementComp : UnitMovement
 {
 
 
-    public override Transform Target
+    public override Transform TargetBeacon
     {
         get { return target; }
         set
@@ -21,8 +21,8 @@ public class MovementComp : UnitMovement
             rotationProgress = 0f;
             reachedHorizontalTarget = false;
             reachedVerticalTarget = false;
-            targetDistance = Vector3.Distance(transform.position, Target.transform.position);
-            targetDirection = Target.transform.position - transform.position;
+            targetDistance = Vector3.Distance(transform.position, TargetBeacon.transform.position);
+            targetDirection = TargetBeacon.transform.position - transform.position;
             var rotationDirection = Vector3.RotateTowards(transform.forward, targetDirection, 360f, 1f);
             targetRotation = Quaternion.LookRotation(rotationDirection);
         }
@@ -58,7 +58,7 @@ public class MovementComp : UnitMovement
     private void FixedUpdate()
     {
         if (rb == null) { return; }
-        if (Target == null) { return; }
+        if (TargetBeacon == null) { return; }
 
         ////Large ship movement
         //if (rotationProgress != 1f)
@@ -97,7 +97,7 @@ public class MovementComp : UnitMovement
             //transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationProgress);
         }
 
-        targetDirection = Target.transform.position - transform.position;
+        targetDirection = TargetBeacon.transform.position - transform.position;
         var rotationDirection = Vector3.RotateTowards(transform.forward, targetDirection, 360f, 1f);
         targetRotation = Quaternion.LookRotation(rotationDirection);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.fixedDeltaTime * travelSpeed+((travelSpeed*0.1f)*travelVelocity));
@@ -112,7 +112,7 @@ public class MovementComp : UnitMovement
         if (!reachedVerticalTarget)
         {
             var vPos = new Vector3(0f, transform.position.y, 0f);
-            var vTargetPos = new Vector3(0f, Target.transform.position.y, 0f);
+            var vTargetPos = new Vector3(0f, TargetBeacon.transform.position.y, 0f);
             var verticalDistance = Vector3.Distance(vPos, vTargetPos);
 
             if (verticalDistance < 1f)
@@ -127,7 +127,7 @@ public class MovementComp : UnitMovement
         if (!reachedHorizontalTarget)
         {
             var hPos = new Vector3(transform.position.x, 0f, transform.position.z);
-            var hTargetPos = new Vector3(Target.transform.position.x, 0f, Target.transform.position.z);
+            var hTargetPos = new Vector3(TargetBeacon.transform.position.x, 0f, TargetBeacon.transform.position.z);
             var horizontalDistance = Vector3.Distance(hPos, hTargetPos);
 
             if (horizontalDistance < 1f)
@@ -154,7 +154,7 @@ public class MovementComp : UnitMovement
 
     private void UpdateTravelVelocity()
     {
-        var currentDist = Vector3.Distance(transform.position, Target.transform.position);
+        var currentDist = Vector3.Distance(transform.position, TargetBeacon.transform.position);
         var decelDist = targetDistance * 0.2f;
 
         var velocityChange = VelocityCalc.GetVelocityChangeBasedOnDistFixed(
@@ -170,9 +170,9 @@ public class MovementComp : UnitMovement
     protected override void MoveUnitToTarget()
     {
         if (rb == null) { return; }
-        if (Target == null) { return; }
+        if (TargetBeacon == null) { return; }
        
-        targetDirection = Target.transform.position - transform.position;
+        targetDirection = TargetBeacon.transform.position - transform.position;
         var rotationDirection = Vector3.RotateTowards(transform.forward, targetDirection, 360f, 1f);
         targetRotation = Quaternion.LookRotation(rotationDirection);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.fixedDeltaTime * travelSpeed + ((travelSpeed * 0.1f) * travelVelocity));
@@ -181,7 +181,7 @@ public class MovementComp : UnitMovement
         if (!reachedVerticalTarget)
         {
             var vPos = new Vector3(0f, transform.position.y, 0f);
-            var vTargetPos = new Vector3(0f, Target.transform.position.y, 0f);
+            var vTargetPos = new Vector3(0f, TargetBeacon.transform.position.y, 0f);
             var verticalDistance = Vector3.Distance(vPos, vTargetPos);
 
             if (verticalDistance < 1f)
@@ -196,7 +196,7 @@ public class MovementComp : UnitMovement
         if (!reachedHorizontalTarget)
         {
             var hPos = new Vector3(transform.position.x, 0f, transform.position.z);
-            var hTargetPos = new Vector3(Target.transform.position.x, 0f, Target.transform.position.z);
+            var hTargetPos = new Vector3(TargetBeacon.transform.position.x, 0f, TargetBeacon.transform.position.z);
             var horizontalDistance = Vector3.Distance(hPos, hTargetPos);
 
             if (horizontalDistance < 1f)
