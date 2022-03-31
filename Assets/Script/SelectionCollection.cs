@@ -4,21 +4,23 @@ using UnityEngine;
 public class SelectionCollection : MonoBehaviour
 {
 
-    public Dictionary<int, SelectableEntity> SelectedEnteties = new Dictionary<int, SelectableEntity>();
+    public Dictionary<int, ISelectable> SelectedEnteties = new Dictionary<int, ISelectable>();
 
-    public void AddSelectedEntity(SelectableEntity entity)
+    public void AddSelectedEntity(ISelectable entity)
     {
-        int id = entity.gameObject.GetInstanceID();
+        entity = entity.GetSelectable();
+        int id = entity.Object.GetInstanceID();
+
         if (SelectedEnteties.ContainsKey(id)) { return; }
 
         SelectedEnteties.Add(id, entity);
         entity.OnSelected();
     }
 
-    public int DeselectEntity(SelectableEntity entity, bool removeID)
+    public int DeselectEntity(ISelectable entity, bool removeID)
     {
 
-        int id = entity.gameObject.GetInstanceID();
+        int id = entity.Object.GetInstanceID();
         if (!SelectedEnteties.ContainsKey(id)) { return -1; }
         entity.DeSelect();
 
@@ -29,7 +31,7 @@ public class SelectionCollection : MonoBehaviour
         return id;
     }
 
-    public void DeselectAllEntties()
+    public void DeselectAllEntities()
     {
         List<int> ids = new List<int>();
         foreach (var entity in SelectedEnteties)

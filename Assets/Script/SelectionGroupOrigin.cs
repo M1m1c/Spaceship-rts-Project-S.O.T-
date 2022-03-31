@@ -16,7 +16,9 @@ public class SelectionGroupOrigin : MonoBehaviour, IOrderable
     }
 
 
-    public Dictionary<int, SelectableEntity> SelectionGroup { get; set; }
+    public Dictionary<int, ISelectable> SelectionGroup { get; set; }
+
+    public Transform RootTransform => throw new System.NotImplementedException();
 
     private LineRenderer lineRenderer;
 

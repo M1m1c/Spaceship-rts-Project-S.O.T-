@@ -9,6 +9,7 @@ using UnityEngine.Assertions;
 public class SelectionController : MonoBehaviour
 {
     public SelectionGroupOrigin CurrentGroupOrigin { get; private set; }
+    public SelectionCollection GetSelectionCollection => selectionCollection;
 
     public GameObject UICanvas;
     public GameObject SelectBoxPrefab;
@@ -95,7 +96,6 @@ public class SelectionController : MonoBehaviour
             ClearSelection();
         }
 
-
         var selectionSize = selectBox.sizeDelta.magnitude;
         var notLargeEnough = selectionSize < minMultiSelectionSize;
 
@@ -108,8 +108,9 @@ public class SelectionController : MonoBehaviour
             {
                 var obj = hit.transform.gameObject;
                 if (obj == null) { return; }
-                var entity = obj.GetComponent<SelectableEntity>();
+                var entity = obj.GetComponent<SelectableUnit>();
                 if (entity == null) { return; }
+
 
                 var isNotEmpty = selectionCollection.SelectedEnteties.Count > 0;
                 var isInSelection = selectionCollection.SelectedEnteties.ContainsKey(obj.GetInstanceID());
@@ -178,7 +179,7 @@ public class SelectionController : MonoBehaviour
             //TODO order all selected units to move to this beacon
             foreach (var pair in selectionCollection.SelectedEnteties)
             {
-                var root = pair.Value.OrderableRoot;
+                var root = pair.Value.OrderableComp;
                 if (root == null) { continue; }
                 root.TargetOrderBeacon = currentOrderBeacon;
             }
@@ -195,7 +196,7 @@ public class SelectionController : MonoBehaviour
 
     private void ClearSelection()
     {
-        selectionCollection.DeselectAllEntties();
+        selectionCollection.DeselectAllEntities();
 
         if (currentOrderBeacon != null)
         {

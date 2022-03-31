@@ -3,11 +3,11 @@ using UnityEngine.Events;
 
 public class SelectionBox3D : MonoBehaviour
 {
-    public UnityEvent<SelectableEntity> SelectionChanged = new UnityEvent<SelectableEntity>();
+    public UnityEvent<SelectableUnit> SelectionChanged = new UnityEvent<SelectableUnit>();
     private void OnTriggerEnter(Collider other)
     {
         if (!other) { return; }
-        var entity= other.gameObject.GetComponent<SelectableEntity>();
+        var entity= other.gameObject.GetComponent<SelectableUnit>();
         if (!entity) { return; }
         SelectionChanged.Invoke(entity);
     }
