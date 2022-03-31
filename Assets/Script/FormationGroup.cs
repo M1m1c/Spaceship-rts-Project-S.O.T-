@@ -2,20 +2,52 @@ using System.Collections.Generic;
 using UnityEngine;
 
 //used for similar space ships to form formations and travel together
-public class FormationGroup : MonoBehaviour
+public class FormationGroup : MonoBehaviour, ISelectable, IOrderable
 {
     public FormationSettings defaultFormation;
     public Transform orderBeaconPrefab;
     private FormationSettings currentFormation;
-    private Dictionary<int, SelectableEntity> units = new Dictionary<int, SelectableEntity>();
-    public void Setup(Dictionary<int,SelectableEntity> selection, FormationSettings formation)
+    private Dictionary<int, SelectableUnit> unitSelections = new Dictionary<int, SelectableUnit>();
+    private Dictionary<int, UnitComp> unitComps = new Dictionary<int, UnitComp>();
+
+    public Transform TargetOrderBeacon 
+    { 
+        get { return target; } 
+        set 
+        { 
+            target = value;
+            if (movementComp) { movementComp.TargetBeacon = value; }
+        } 
+    }
+
+    private Transform target;
+
+    public GameObject Object => gameObject;
+    public IOrderable OrderableComp => this;
+
+    public GroupingSlotComp GroupingSlot => throw new System.NotImplementedException();
+
+    public Transform RootTransform => transform;
+
+    private UnitMovement movementComp;
+
+    public void Setup(Dictionary<int,SelectableUnit> selection, Dictionary<int, UnitComp> comps, FormationSettings formation)
     {
-        units = selection;
+        unitSelections = selection;
+        unitComps = comps;
+
+        foreach (var unit in unitSelections)
+        {
+            unit.Value.GroupingSlot.MyFormationGroup = this;
+        }
 
         if (formation == null)
         { SetFormation(defaultFormation); }
         else 
         { SetFormation(formation); }
+
+        //TODO replace this with a dynamic way of setting what movement to use.
+        movementComp = gameObject.AddComponent<LightShipMovementComp>();
     }
 
     public void SetFormation(FormationSettings formation)
@@ -43,10 +75,10 @@ public class FormationGroup : MonoBehaviour
 
         int loopCount = 1;
 
-        foreach (var unit in units.Values)
+        foreach (var unit in unitSelections.Values)
         {
             //var unitRoot = unit.transform.parent;
-            var unitRoot = unit.OrderableRoot;
+            var unitRoot = unit.OrderableComp;
             if(unitRoot == null) { continue; }
 
             if (isFirstCase)
@@ -55,7 +87,7 @@ public class FormationGroup : MonoBehaviour
                 // set it to move to objects position
                 var commandBeacon = Instantiate(orderBeaconPrefab, currentPos, Quaternion.identity);
                 unitRoot.TargetOrderBeacon = commandBeacon;
-                //unitRoot = transform;
+                unitRoot.RootTransform.parent = transform;
                 continue;
             }
 
@@ -83,7 +115,7 @@ public class FormationGroup : MonoBehaviour
             //set target to be placement, spawn order beacon at pos to move unit there
             var beacon = Instantiate(orderBeaconPrefab, placement, Quaternion.identity);
             unitRoot.TargetOrderBeacon = beacon;
-            //unitRoot.transform.parent = transform;
+            unitRoot.RootTransform.parent = transform;
             loopCount++;
 
             if (loopCount > sectionCount)
@@ -97,17 +129,37 @@ public class FormationGroup : MonoBehaviour
 
     }
 
-    public bool AddUnit(SelectableEntity entity)
+    public bool AddUnit(SelectableUnit entity)
     {
         return false;
     }
 
-    public bool RemoveUnit(SelectableEntity entity)
+    public bool RemoveUnit(SelectableUnit entity)
     {
         return false;
     }
 
-    public SelectableEntity GetCommanderUnit() { return null; }
+    public SelectableUnit GetCommanderUnit() { return null; }
 
+    public void OnSelected()
+    {
+        foreach (var unit in unitSelections)
+        {
+            unit.Value.OnSelected();
+        }
+    }
+
+    public void DeSelect()
+    {
+        foreach (var unit in unitSelections)
+        {
+            unit.Value.DeSelect();
+        }
+    }
+
+    public ISelectable GetSelectable()
+    {
+        return this;
+    }
 
 }
