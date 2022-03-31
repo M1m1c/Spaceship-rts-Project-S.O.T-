@@ -63,12 +63,6 @@ public class LightShipMovementComp : UnitMovement
 
     private const float reachTargetAdditive = 0.3f;
 
-    void Start()
-    {
-        rb = GetComponent<Rigidbody>();
-        rb.maxAngularVelocity = maxAngularVelocity;
-    }
-
     private void FixedUpdate()
     {
         MoveUnitToTarget();
@@ -102,7 +96,6 @@ public class LightShipMovementComp : UnitMovement
 
     protected override void MoveUnitToTarget()
     {
-        if (rb == null) { return; }
         if (TargetBeacon == null) { return; }
 
         distanceToTarget = Vector3.Distance(transform.position, TargetBeacon.transform.position);
@@ -131,9 +124,9 @@ public class LightShipMovementComp : UnitMovement
             Time.fixedDeltaTime * travelSpeed + (rotSpeed * rotVel));
 
         //TODO when done rotationg to final rotation remove target
-        //if (transform.rotation==finalRotation && reachedHorizontalTarget && reachedVerticalTarget) 
-        //{ 
-        //    Destroy(target.gameObject); 
+        //if (transform.rotation == finalRotation && reachedHorizontalTarget && reachedVerticalTarget)
+        //{
+        //    Destroy(target.gameObject);
         //}
 
         if (reachedVerticalTarget && reachedHorizontalTarget) { return; }
