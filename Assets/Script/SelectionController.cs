@@ -220,8 +220,8 @@ public class SelectionController : MonoBehaviour
         currentOrderBeacon = Instantiate(OrderBeaconPrefab);
 
         var selectionGroup = selectionCollection.SelectedEnteties;
-        var planePos = GroupPlaneCalc.GetGroupPlane(selectionGroup);
-        beaconYLevel = GroupPlaneCalc.GetAverageYPos(selectionGroup);
+        var planePos = GroupPlaneCalc<ISelectable>.GetGroupPlane(selectionGroup);
+        beaconYLevel = GroupPlaneCalc<ISelectable>.GetAverageYPos(selectionGroup);
 
         currentOrderBeacon.transform.position = planePos;
         CurrentGroupOrigin.transform.position = planePos;

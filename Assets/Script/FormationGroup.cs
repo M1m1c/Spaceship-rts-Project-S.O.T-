@@ -1,23 +1,28 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 //used for similar space ships to form formations and travel together
 public class FormationGroup : MonoBehaviour, ISelectable, IOrderable
 {
+    private UnityEvent<bool> commanderHasArrived = new UnityEvent<bool>();
+
     public FormationSettings defaultFormation;
     public Transform orderBeaconPrefab;
     private FormationSettings currentFormation;
     private Dictionary<int, SelectableUnit> unitSelections = new Dictionary<int, SelectableUnit>();
-    private Dictionary<int, UnitComp> unitComps = new Dictionary<int, UnitComp>();
+    //private Dictionary<int, UnitComp> unitComps = new Dictionary<int, UnitComp>();
+    private IOrderable commanderUnit;
 
-    public Transform TargetOrderBeacon 
-    { 
-        get { return target; } 
-        set 
-        { 
+    public Transform TargetOrderBeacon
+    {
+        get { return target; }
+        set
+        {
             target = value;
-            if (movementComp) { movementComp.TargetBeacon = value; }
-        } 
+            //if (commanderUnit != null) { commanderUnit.TargetOrderBeacon = value; }
+            MoveFormationGroup(value, commanderUnit);
+        }
     }
 
     private Transform target;
@@ -29,71 +34,95 @@ public class FormationGroup : MonoBehaviour, ISelectable, IOrderable
 
     public Transform RootTransform => transform;
 
-    private UnitMovement movementComp;
+    //private UnitMovement movementComp;
 
-    public void Setup(Dictionary<int,SelectableUnit> selection, Dictionary<int, UnitComp> comps, FormationSettings formation)
+    public void Setup(Dictionary<int, SelectableUnit> selection, FormationSettings formation)
     {
         unitSelections = selection;
-        unitComps = comps;
+        //unitComps = comps;
 
         foreach (var unit in unitSelections)
         {
             unit.Value.GroupingSlot.MyFormationGroup = this;
+            var comp = (unit.Value.OrderableComp as UnitComp);
+            if (!comp) { continue; }
+
+            if (commanderUnit == null)
+            {
+                var unitRoot = unit.Value.OrderableComp;
+                if (unitRoot != null)
+                {
+                    commanderUnit = unitRoot;
+                    transform.parent = unit.Value.transform;
+                    transform.localPosition = Vector3.zero;
+                    comp.MovementComp.HasArrived.AddListener(commanderHasArrived.Invoke);
+                    continue;
+                }
+            }
+            
+            
+            commanderHasArrived.AddListener(comp.MovementComp.SetAllowedToArrive);
         }
 
         if (formation == null)
         { SetFormation(defaultFormation); }
-        else 
+        else
         { SetFormation(formation); }
 
-        //TODO replace this with a dynamic way of setting what movement to use.
-        movementComp = gameObject.AddComponent<LightShipMovementComp>();
     }
 
     public void SetFormation(FormationSettings formation)
     {
+        Vector3 gatheringPoint = Vector3.zero;
+        gatheringPoint += GroupPlaneCalc<SelectableUnit>.GetGroupPlane(unitSelections);
+        var y = GroupPlaneCalc<SelectableUnit>.GetAverageYPos(unitSelections);
+        gatheringPoint += new Vector3(0f, y, 0f);
+
+        currentFormation = formation;
+        var beacon = Instantiate(orderBeaconPrefab, gatheringPoint, Quaternion.identity);
+        MoveFormationGroup(beacon,null);
+
+    }
+
+    private void MoveFormationGroup(Transform target, IOrderable commander)
+    {
         int sectionCount = 0;
         float currentXOffset = 0f;
         float currentYOffset = 0f;
-        float currentZOffSet = formation.ZOffset;
+        float currentZOffSet = currentFormation.ZOffset;
 
-        if (formation.XOffset != 0f)
+        if (currentFormation.XOffset != 0f)
         {
             sectionCount += 2;
-            currentXOffset = formation.XOffset;
+            currentXOffset = currentFormation.XOffset;
         }
 
-        if (formation.YOffset != 0f)
+        if (currentFormation.YOffset != 0f)
         {
             sectionCount += 2;
-            currentYOffset = formation.YOffset;
+            currentYOffset = currentFormation.YOffset;
         }
 
-        bool isFirstCase = formation.IsFirstIndexCenter;
-
-        var currentPos = transform.position;
+        bool isFirstCase = currentFormation.IsFirstIndexCenter;
 
         int loopCount = 1;
-
+        var comTransform = commander != null ? commanderUnit.RootTransform : target;
+        Matrix4x4 targetMatrix = Matrix4x4.TRS(comTransform.position, comTransform.rotation, comTransform.localScale);
         foreach (var unit in unitSelections.Values)
         {
-            //var unitRoot = unit.transform.parent;
             var unitRoot = unit.OrderableComp;
-            if(unitRoot == null) { continue; }
+            if (unitRoot == null) { continue; }
 
             if (isFirstCase)
             {
-                isFirstCase = false;
-                // set it to move to objects position
-                var commandBeacon = Instantiate(orderBeaconPrefab, currentPos, Quaternion.identity);
-                unitRoot.TargetOrderBeacon = commandBeacon;
-                unitRoot.RootTransform.parent = transform;
+                isFirstCase = false;                
+                unitRoot.TargetOrderBeacon = target;
                 continue;
             }
 
-            
 
-            Vector3 placement = currentPos;
+
+            Vector3 placement = Vector3.zero;
             switch (loopCount)
             {
                 case 1:
@@ -112,21 +141,18 @@ public class FormationGroup : MonoBehaviour, ISelectable, IOrderable
                     placement += new Vector3(-currentXOffset, -currentYOffset, currentZOffSet);
                     break;
             }
-            //set target to be placement, spawn order beacon at pos to move unit there
-            var beacon = Instantiate(orderBeaconPrefab, placement, Quaternion.identity);
+            var beacon = Instantiate(orderBeaconPrefab, targetMatrix.MultiplyPoint3x4(placement), target.rotation, comTransform);
             unitRoot.TargetOrderBeacon = beacon;
-            unitRoot.RootTransform.parent = transform;
             loopCount++;
 
             if (loopCount > sectionCount)
             {
-                currentXOffset += formation.XOffset;
-                currentYOffset += formation.YOffset;
-                currentZOffSet += formation.ZOffset;
+                currentXOffset += currentFormation.XOffset;
+                currentYOffset += currentFormation.YOffset;
+                currentZOffSet += currentFormation.ZOffset;
                 loopCount = 1;
             }
         }
-
     }
 
     public bool AddUnit(SelectableUnit entity)

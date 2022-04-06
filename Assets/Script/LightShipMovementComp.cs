@@ -28,6 +28,7 @@ public class LightShipMovementComp : UnitMovement
             horiSpeedMod = 1f;
 
             finalRotation = Quaternion.LookRotation(TargetBeacon.transform.forward);
+            HasArrived.Invoke(false);
         }
     }
     private Transform target;
@@ -62,6 +63,22 @@ public class LightShipMovementComp : UnitMovement
     private float horiSpeedMod = 1f;
 
     private const float reachTargetAdditive = 0.3f;
+
+    private UnitComp unitComp;
+
+    public override void SetAllowedToArrive(bool value)
+    {
+        base.SetAllowedToArrive(value);
+        if (value && reachedHorizontalTarget && reachedVerticalTarget)
+        {
+            transform.position = target.position;
+        }
+    }
+
+    private void Start()
+    {
+        unitComp = GetComponent<UnitComp>();
+    }
 
     private void FixedUpdate()
     {
@@ -98,16 +115,16 @@ public class LightShipMovementComp : UnitMovement
     {
         if (TargetBeacon == null) { return; }
 
-        distanceToTarget = Vector3.Distance(transform.position, TargetBeacon.transform.position);
+        targetDistance = Vector3.Distance(transform.position, TargetBeacon.transform.position);
         angleToTarget = Vector3.Angle(transform.forward, targetDirection);
 
         UpdateRotationVelocity();
         targetDirection = TargetBeacon.transform.position - transform.position;
 
-        if (distanceToTarget < 1f)
+        if (targetDistance < 1f)
         {
             //TODO fix when vertical move is longer that it does not rotate correctly at the end of movement
-            targetRotation = finalRotation;     
+            targetRotation = finalRotation;
         }
         else
         {
@@ -128,7 +145,11 @@ public class LightShipMovementComp : UnitMovement
         //{
         //    Destroy(target.gameObject);
         //}
-
+        if (!allowedToArrive)
+        {
+            reachedVerticalTarget = false;
+            reachedHorizontalTarget = false;
+        }
         if (reachedVerticalTarget && reachedHorizontalTarget) { return; }
 
         //TODO might want to gradually transition between these modfier values,
@@ -199,6 +220,10 @@ public class LightShipMovementComp : UnitMovement
 
         }
 
-        if (reachedVerticalTarget && reachedHorizontalTarget) { transform.position = target.position; }
+        if (reachedVerticalTarget && reachedHorizontalTarget)
+        {
+            transform.position = target.position;
+            HasArrived.Invoke(true);
+        }
     }
 }

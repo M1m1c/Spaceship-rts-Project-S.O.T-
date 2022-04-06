@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class GroupPlaneCalc
+public static class GroupPlaneCalc<T> where T : ISelectable
 {
-   public static Vector3 GetGroupPlane(Dictionary<int,ISelectable> selectionGroup)
+   public static Vector3 GetGroupPlane(Dictionary<int,T> selectionGroup)
     {
         if (selectionGroup == null || selectionGroup.Count == 0) { return Vector3.zero; }
         var averageX = 0f;
@@ -26,7 +26,7 @@ public static class GroupPlaneCalc
         return new Vector3(averageX, averageY, averageZ);
    }
 
-    public static float GetAverageYPos(Dictionary<int, ISelectable> selectionGroup)
+    public static float GetAverageYPos(Dictionary<int, T> selectionGroup)
     {
         var averageY = 0f;
 

@@ -32,7 +32,7 @@ public class SelectionGroupOrigin : MonoBehaviour, IOrderable
 
     private void Update()
     {
-        transform.position = GroupPlaneCalc.GetGroupPlane(SelectionGroup);
+        transform.position = GroupPlaneCalc<ISelectable>.GetGroupPlane(SelectionGroup);
         if (TargetOrderBeacon)
         {
             var start = transform.position;
